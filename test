@@ -1,7 +1,70 @@
-<html>
-  <body>
-    <p>
-      test
-    </p>
-  </body>
-</html>
+var px=100;//x position
+var py=100;//y position
+var vx=0;// x velocity
+var vy=0;//y velocity
+blocks=[];
+//add a new block to the array:
+newBlock=function(x,y,w,h,type){
+  blocks[blocks.length]={
+    x:x,
+    y:y,
+    w:w,
+    h:h,
+    type:type
+  };
+};
+var i=0;
+var onGround=false;
+var touchingLeftWall=false;
+var touchingRightWall=false;
+var touchingCeiling=false;
+/*var collide=function(x,y){//checks for collisions
+  for(i=0;i<blocks.length;i++){
+    if((x+50-blocks[i].x)*(-1)*(blocks[i].h/blocks[i].w)>y+50-blocks[i].y){
+      touchingRightWall=true;
+      x=blocks[i].x
+    }
+  }
+};*/
+var jump=function(){
+  vy-=30;
+};
+function draw() {
+      var canvas=document.getElementById('canvas');
+  if (canvas.getContext) {
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,1350,1350);
+    ctx.fillStyle = 'rgb(0, 40, 200)';
+    ctx.fillRect(x, y, 50, 50);
+    x+=vx;
+    y+=vy;
+    if(vy>9000){
+      vy=0;
+    }
+    if(vx>9000){
+      vx=0;
+    }
+    if(x>1400){
+      x=-50;
+    }
+    if(y>1400){
+      y=-50;
+    }
+    if(x<-50){
+      x=1400;
+    }
+    if(y<-50){
+      y=1400;
+    }
+    /*if(onGround){
+      if(vy>0){
+        vy=0;
+      }
+    }else{
+      vy+=1;
+    }*/
+  }
+  window.requestAnimationFrame(draw);
+}
+window.requestAnimationFrame(draw);
+
