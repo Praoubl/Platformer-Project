@@ -4,7 +4,7 @@ var vx=0;// x velocity
 var vy=0;//y velocity
 blocks=[];
 //add a new block to the array:
-newBlock=function(x,y,w,h,type){
+newBlock=function(x,y,w,h,type){//
   blocks[blocks.length]={
     x:x,
     y:y,
