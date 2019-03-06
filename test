@@ -14,7 +14,7 @@ newBlock=function(x,y,w,h,type){//
   };
 };
 var i=0;
-var onGround=false;
+var onGround=false;//
 var touchingLeftWall=false;
 var touchingRightWall=false;
 var touchingCeiling=false;
