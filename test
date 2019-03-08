@@ -1,69 +1,116 @@
-var px=100;//x position
-var py=100;//y position
-var vx=0;// x velocity
-var vy=0;//y velocity
-blocks=[];
-//add a new block to the array:
-newBlock=function(x,y,w,h,type){
-  blocks[blocks.length]={
-    x:x,
-    y:y,
-    w:w,
-    h:h,
-    type:type
-  };
+var input = {
+  right: false,
+  up: false,
+  left: false,
+  down: false,
+  quit: false
 };
-var i=0;
-var onGround=false;//
-var touchingLeftWall=false;
-var touchingRightWall=false;
-var touchingCeiling=false;
-/*var collide=function(x,y){//checks for collisions
-  for(i=0;i<blocks.length;i++){
-    if((x+50-blocks[i].x)*(-1)*(blocks[i].h/blocks[i].w)>y+50-blocks[i].y){
-      touchingRightWall=true;
-      x=blocks[i].x
+var KEY = {
+  D: 68,
+  W: 87,
+  A: 65,
+  S:83,
+  RIGHT:39,
+  UP:38,
+  LEFT:37,
+  DOWN:40,
+  Q:81
+};
+function press(evt) {
+  var code = evt.keyCode;
+    switch(code) {
+      case KEY.RIGHT:
+      case KEY.D: input.right = true; break;
+
+      case KEY.UP:
+      case KEY.W: input.up = true; break;
+
+      case KEY.LEFT:
+      case KEY.A: input.left = true; break;
+
+      case KEY.DOWN:
+      case KEY.S: input.down = true; break;
+
+      case KEY.Q: input.quit = true; break;
     }
   }
-};*/
-var jump=function(){
-  vy-=30;
+function release(evt) {
+  var code = evt.keyCode;
+  switch(code) {
+    case KEY.RIGHT:
+    case KEY.D: input.right = false; break;
+    case KEY.UP:
+    case KEY.W: input.up = false; break;
+    case KEY.LEFT:
+    case KEY.A: input.left = false; break;
+    case KEY.DOWN:
+    case KEY.S: input.down = false; break;
+    case KEY.Q: break;
+  }
+}
+var level = [" ", "", "", "    x", "    xxxxx", "", "", "            xxxxxxxxxxx", "", "", "     xx", "", "", "            xx", "", "", "       xx", "", "", "     x","xxxxxxxxxxxxxxxxx"];
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var player = function(x, y) { this.x = x;
+    this.y = y;
+    this.acceleration = 0;
+    this.jumping = true;
 };
-function draw() {
-      var canvas=document.getElementById('canvas');
-  if (canvas.getContext) {
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,1350,1350);
-    ctx.fillStyle = 'rgb(0, 40, 200)';
-    ctx.fillRect(x, y, 50, 50);
-    x+=vx;
-    y+=vy;
-    if(vy>9000){
-      vy=0;
-    }
-    if(vx>9000){
-      vx=0;
-    }
-    if(x>1400){
-      x=-50;
-    }
-    if(y>1400){
-      y=-50;
-    }
-    if(x<-50){
-      x=1400;
-    }
-    if(y<-50){
-      y=1400;
-    }
-    /*if(onGround){
-      if(vy>0){
-        vy=0;
-      }
-    }else{
-      vy+=1;
-    }*/
+player.prototype.display = function() { 
+    ctx.fillStyle= 'rgb(20, 20, 20)';
+    ctx.fillRect(this.x, this.y, 20, 20);
+    if (this.y>canvas.height-20) {this.y=canvas.height-20;
+        this.acceleration = 0;
+        this.jumping = false; }
+    if (input.up && !this.jumping) { this.acceleration = -5;
+        this.jumping = true; }
+    if (input.left) { this.x -= 3; }
+    if (input.right) { this.x += 3; }
+    this.acceleration+=0.17;
+    this.y+=this.acceleration;
+};
+var player1=new player(0, 380);
+var block=function(x,y,t) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+};
+block.prototype.display = function() { 
+  if(this.t===0){
+    ctx.fillStyle='rgb(70, 70, 70)';
+  }
+  ctx.fillRect(this.x, this.y, 20, 20);
+  if (player1.x > this.x + 10 && player1.x < this.x + 20 && player1.y + 19 > this.y && player1.y < this.y + 19) {
+    player1.x = this.x + 20; 
+  }
+  if(player1.x + 20 > this.x && player1.x + 20 < this.x + 10 && player1.y + 19 > this.y && player1.y < this.y + 19) { 
+    player1.x = this.x - 20; 
+  }
+  if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
+    player1.y = this.y + 20;
+    player1.acceleration = 0; 
+  }
+  if(player1.y + 20 > this.y && player1.y + 20 < this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
+    player1.y = this.y - 20;
+    player1.acceleration = 0;
+    player1.jumping = false; 
+  }
+};
+var blocks = [];
+for (var y = 0;
+y < level.length; y++) {
+    for (var x = 0;
+    x < level[y].length; x++) {
+        if (level[y][x] === "x") { blocks.push(new block(x * 20, y * 20,0)); } } }
+draw = function() { 
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  player1.display();
+  for (var i = 0;i < blocks.length; i++) {
+    blocks[i].display(); 
   }
   window.requestAnimationFrame(draw);
-}
+};
 window.requestAnimationFrame(draw);
+
