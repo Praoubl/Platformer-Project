@@ -55,9 +55,10 @@ var levelStartCoords={
 };
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
+var cloudLevel=true;
 var levels =[[" ", "                                                x", "", "    x                              xx      l", "    xxxxx      l                    x             x", "               l", "               l", "            xxxxxxxxxxx      x      x      x     xx", "", "", "     xx", "", "", "            xx", "", "", "       xx                                         x", "                                                 xx", "", "           o","xxxxxxxxxxxxxxxxx        x        x        x","llllllllllllllllllllllllllllllllllllllllllllll","                                                  x","","g                                 xxxxxxxxxxxxx","xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxllll"],
 ["","","","","","xxxxxx","","","","","lllllllllllllllll","","","","","","","llllllllllllllll  lll","","","","","                                  x","                 xxxxxxxxxxx      x","                 x         x      x","lllllllllllllllllxlllllllllxllllllxlllllllllgllllll"],[" "," "]];
-var cloudLevels=[["","","","","","","","","","","","","","","","","","","","","                                     oo","","","                              ooo","                                    ooo","                                             ooo"]]
+var cloudLevels=[["","","","","","","","","","","","","","","","                                        o","","                              oo","","","oo                                   oo","","","                             ooo","                                    ooo","                                             ooo"]]
 var level=levels[levelNum];
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -67,13 +68,13 @@ var player = function(x, y) {
   this.acceleration = 0;
   this.jumping = true;
 };
-var cloudLevel=false;
-var cloudLevel2=cloudLevel;
+var cloudLevel2=false;
 player.prototype.display = function() { 
   this.respawn=function(x1,y1){
     this.x = x1;
     this.y = y1;
     this.acceleration=0;
+    cloudLevel=false;
   };
   ctx.fillStyle= 'rgb(20, 20, 20)';
   ctx.fillRect(this.x, this.y, 20, 20);
