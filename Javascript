@@ -2,7 +2,7 @@ var levelNum=0;
 var levelStartCoords={
   x:0,
   y:380,
-};//
+};
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
