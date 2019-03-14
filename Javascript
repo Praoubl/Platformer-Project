@@ -1,4 +1,4 @@
-var levelNum=0;
+var levelNum=1;
 var levelStartCoords={
   x:0,
   y:380,
@@ -7,7 +7,7 @@ var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
 var levels =[["","","                                                x", "", "    x                              xx      l", "    xxxxx      l                    x             x", "               l", "               l", "            xxxxxxxxxxx      x      x      x     xx","", "", "     xx", "", "", "            xx", "", "                                                  x", "       xx                                        xx","", "","xxxxxxxxxxxxxxxxx        x        x        x","xxxxx     xxxxxxlllllllllxllllllllllllllllllll","                                                  x","","g      l                          xxxxxxxxxxxxx","xxxxxxxlxxxxxxxxxxxxxxxxlxxxxxxxxxxxxxxxxxxxxxxllll"],
-["","","","","","xxxxxx","","","","","lllllllllllllllll","","","","","","","llllllllllllllll  lll","","","","","                                  x","                 xxxxxxxxxxx      x","                 x         x      x","lllllllllllllllllxlllllllllxllllllxlllllllllgglllll"],[" "," "]];
+["","","","","","xxxxxx","","","","","llllllllllllllll","","","","","","                                      l","lllllllllllllll  llllll","","","                                      l","","                                  x","                xxxxxxxxxxx      xx","                xx       xx      x","llllllllllllllllxxlllllllxxllllllxlllllllllggglllll"],[" "," "]];
 var cloudLevels=[["",
 "          g",
 "         oo",
@@ -224,9 +224,9 @@ block.prototype.display = function() {
   if(player1.x + 20 > this.x && player1.x + 20 < this.x + 10 && player1.y + 19 > this.y && player1.y < this.y + 19) { 
     player1.x = this.x - 20; 
   }
-  if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
+  if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20&&player1.acceleration<0) { 
     player1.y = this.y + 20;
-    player1.acceleration = 0; 
+    player1.acceleration = 0;
   }
   if(player1.y + 20 > this.y && player1.y + 20 < this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
     player1.y = this.y - 20;
