@@ -1,11 +1,8 @@
 var levelNum=0;
-var levelStartCoords={
-  x:0,
-  y:380,
-};//uiop
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
+var blocks = [];
 var levels =[["","","                                                x", "", "    x                              xx      l", "    xxxxx      l                    x             x", "               l", "               l", "            xxxxxxxxxxx      x      x      x     xx","", "", "     xx", "", "", "            xx", "", "                                                  x", "       xx                                        xx","", "","xxxxxxxxxxxxxxxxx        x        x        x","xxxxx     xxxxxxlllllllllxllllllllllllllllllll","                                                  x","","g      l                          xxxxxxxxxxxxx","xxxxxxxlxxxxxxxxxxxxxxxxlxxxxxxxxxxxxxxxxxxxxxxllll"],
 ["","","","","","xxxxxx","","","","","llllllllllllllll","","","","","","                                      l","lllllllllllllll  llllll","","","                                      l","","                                  x","                xxxxxxxxxxx      xx","                xx       xx      x","llllllllllllllllxxlllllllxxllllllxlllllllllggglllll"],[" "," "]];
 var cloudLevels=[["",
@@ -33,13 +30,19 @@ var cloudLevels=[["",
 "          oooo",
 "                             ooo",
 "                                    ooo",
-"                                             ooo"],["","","","","","","","","","","","","","","","","","","","","","","","o"],[""]]
+"                                             ooo"],["","","","","","","","","","","","","","","","","","","","","","","","o"],[""]];
+var levelFunctions=[function(){
+  if(!cloudLevel){
+    blocks.push(new sign(60,380,0,"text"));
+  }
+},function(){},function(){},function(){},function(){},function(){}];
 var input = {
   right: false,
   up: false,
   left: false,
   down: false,
-  resrart: false
+  restart: false,
+  attack:false,
 };
 var KEY = {
   D: 68,
@@ -50,7 +53,14 @@ var KEY = {
   UP:38,
   LEFT:37,
   DOWN:40,
-  Q:81
+  Q:81,
+  R:82
+};
+var bannerText=function(txt,x,y){
+  let text1 = ctx.measureText(txt);
+  ctx.font = '15px sans-serif';
+  ctx.fillStyle= 'rgb(0, 0, 0)';
+  ctx.fillText(txt,x+10-(text1.width/2),y-10);
 };
 function press(evt) {
   var code = evt.keyCode;
@@ -68,6 +78,8 @@ function press(evt) {
       case KEY.S: input.down = true; break;
 
       case KEY.Q: input.restart = true; break;
+      
+      case KEY.R: input.attack = true; break;
     }
   }
 function release(evt) {
@@ -82,6 +94,7 @@ function release(evt) {
     case KEY.DOWN:
     case KEY.S: input.down = false; break;
     case KEY.Q: input.restart = false; break;
+    case KEY.R: input.attack = false; break;
   }
 }
 var level=levels[levelNum];
@@ -92,6 +105,31 @@ var player = function(x, y) {
   this.y = y;
   this.acceleration = 0;
   this.jumping = true;
+  this.direction="right";
+  this.attacking=false;
+};
+var attackObj=function(x,y,d,index){
+  this.x=x;
+  this.y=y;
+  this.direction=d;
+  this.index=index;
+};
+var blank=function(){
+  this.is=true;
+};
+blank.prototype.display=function(){};
+attackObj.prototype.display=function(){
+  ctx.fillStyle= 'rgb(120,120,120)';
+  ctx.fillRect(this.x, this.y, 5, 5);
+  if(this.direction==="left"){
+    this.x-=3;
+  }
+  if(this.direction==="right"){
+    this.x+=3;
+  }
+  if(this.x<0||this.x>canvas.width||this.y>canvas.height||this.y<0){
+    blocks[this.index]=new blank(-20,-20,0);
+  }
 };
 var cloudLevel2=false;
 player.prototype.display = function() { 
@@ -108,8 +146,11 @@ player.prototype.display = function() {
     this.jumping = false; }
   if (input.up && !this.jumping) { this.acceleration = -5;
     this.jumping = true; }
-  if (input.left) { this.x -= 3; }
-  if (input.right) { this.x += 3; }
+  if (input.left) { this.x -= 3; this.direction="left";}
+  if (input.right) { this.x += 3; this.direction="right";}
+  if(input.attack){
+    this.attacking=true; blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
+    this.attacking=false;}
   this.acceleration+=0.17;
   this.y+=this.acceleration;
   if(input.restart){
@@ -132,6 +173,9 @@ player.prototype.display = function() {
     this.y=canvas.height;
     cloudLevel=true;
   }
+  if(this.attacking=true){
+    
+  }
 };
 var player1=new player(0, 380);
 var block=function(x,y,t) { 
@@ -148,6 +192,12 @@ var goal=function(x,y,t) {
   this.x=x;
   this.y=y;
   this.t=t;
+};
+var sign=function(x,y,t,txt) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+  this.txt=txt;
 };
 lava.prototype.display = function() { 
   if(this.t===0){
@@ -169,6 +219,31 @@ lava.prototype.display = function() {
   }
   if(player1.y + 20 > this.y && player1.y + 20 < this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
     player1.respawn(levelStartCoords.x,levelStartCoords.y); 
+  }
+};
+sign.prototype.display = function() { 
+  if(this.t===0){
+    ctx.fillStyle='rgb(50, 30, 0)';
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(40, 24, 0)';
+    ctx.fillRect(this.x+10, this.y, 10, 10);
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+  }
+  if (player1.x > this.x + 10 && player1.x < this.x + 20 && player1.y + 19 > this.y && player1.y < this.y + 19) {
+    bannerText(this.txt,this.x,this.y);
+  }
+  else if(player1.x + 20 > this.x && player1.x + 20 < this.x + 10 && player1.y + 19 > this.y && player1.y < this.y + 19) { 
+    bannerText(this.txt,this.x,this.y);
+  }
+  else if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
+    bannerText(this.txt,this.x,this.y);
+  }
+  else if(player1.y + 20 > this.y && player1.y + 20 < this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
+    bannerText(this.txt,this.x,this.y);
+  }
+  else if(player1.x>this.x-20&&player1.x<this.x+20&&player1.y>this.y-20&&player1.y<this.y+20){
+    bannerText(this.txt,this.x,this.y);
   }
 };
 goal.prototype.display = function() { 
@@ -234,7 +309,6 @@ block.prototype.display = function() {
     player1.jumping = false; 
   }
 };
-var blocks = [];
 var reload=function(a){
   blocks = [];
   for (var y = 0;y < level.length; y++) {
@@ -252,6 +326,7 @@ var reload=function(a){
       }
     }
   }
+  levelFunctions[levelNum]();
   if(isNaN(a)){
     player1.x=levelStartCoords.x;
     player1.y=levelStartCoords.y;
@@ -281,7 +356,6 @@ draw = function() {
                    level=levels[levelNum];
                  }
     reload(1);
-    this.jumping=true;
   }
   if(cloudLevel){
     ctx.fillStyle='rgb(0, 210, 240)';
@@ -293,6 +367,7 @@ draw = function() {
   for (var i = 0;i < blocks.length; i++) {
     blocks[i].display();
   }
+  ctx.font = '10px sans-serif';
   ctx.fillText(levelNum,2,10);
   window.requestAnimationFrame(draw);
 };
