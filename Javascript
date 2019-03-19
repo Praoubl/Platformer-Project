@@ -1,41 +1,50 @@
+//wasd and arrows
+//shift to attack
+//1:stone
+//2:cloud
+//g:goal
+//l:lava
+//3 and 4:brick
+//-:stone background
+//_:cloud background
+//, and .:brick background
+//t:trampoline
+//s:supply box
 var levelNum=0;
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
 var blocks = [];
-var levels =[["","","                                                x", "", "    x                              xx      l", "    xxxxx      l                    x             x", "               l", "               l", "            xxxxxxxxxxx      x      x      x     xx","", "", "     xx", "", "", "            xx", "", "                                                  x", "       xx                                        xx","", "","xxxxxxxxxxxxxxxxx        x        x        x","xxxxx     xxxxxxlllllllllxllllllllllllllllllll","                                                  x","","g      l                          xxxxxxxxxxxxx","xxxxxxxlxxxxxxxxxxxxxxxxlxxxxxxxxxxxxxxxxxxxxxxllll"],
-["","","","","","xxxxxx","","","","","llllllllllllllll","","","","","","                                      l","lllllllllllllll  llllll","","","                                      l","","                                  x","                xxxxxxxxxxx      xx","                xx       xx      x","llllllllllllllllxxlllllllxxllllllxlllllllllggglllll"],[" "," "]];
-var cloudLevels=[["",
-"          g",
-"         oo",
-"",
-"",
-"   ooo",
-"",
-"",
-"           oo",
-"",
-"",
-"     o                 oo        ooo",
-"                                           oo",
-"",
-"       o",
-"                                       o",
-"",
-"  o                           oo",
-"",
-"",
-"ooo                                  oo",
-"",
-"          oooo",
-"                             ooo",
-"                                    ooo",
-"                                             ooo"],["","","","","","","","","","","","","","","","","","","","","","","","o"],[""]];
+var height=0;
+var levels =[[",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,4,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.3",
+              ",.,.,.,t,.,.,s3",
+              "343434343434343"]];
+var cloudLevels=[[],[],[]];
 var levelFunctions=[function(){
   if(!cloudLevel){
-    blocks.push(new sign(60,380,0,"text"));
+    
   }
 },function(){},function(){},function(){},function(){},function(){}];
+var timer=0;
+var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
 var input = {
   right: false,
   up: false,
@@ -54,7 +63,7 @@ var KEY = {
   LEFT:37,
   DOWN:40,
   Q:81,
-  R:82
+  R:16
 };
 var bannerText=function(txt,x,y){
   let text1 = ctx.measureText(txt);
@@ -107,28 +116,36 @@ var player = function(x, y) {
   this.jumping = true;
   this.direction="right";
   this.attacking=false;
+  this.hp=20;
+  this.ammo=10;
 };
 var attackObj=function(x,y,d,index){
   this.x=x;
   this.y=y;
   this.direction=d;
   this.index=index;
+  this.acceleration=0;
 };
 var blank=function(){
   this.is=true;
 };
 blank.prototype.display=function(){};
 attackObj.prototype.display=function(){
-  ctx.fillStyle= 'rgb(120,120,120)';
+  ctx.fillStyle= 'rgb(190,10,10)';
   ctx.fillRect(this.x, this.y, 5, 5);
   if(this.direction==="left"){
-    this.x-=3;
+    this.x-=7;
   }
   if(this.direction==="right"){
-    this.x+=3;
+    this.x+=7;
   }
+  this.acceleration+=0.02;
+  this.y+=this.acceleration;
   if(this.x<0||this.x>canvas.width||this.y>canvas.height||this.y<0){
-    blocks[this.index]=new blank(-20,-20,0);
+    blocks[this.index-1]=new blank(-20,-20,0);
+  }
+  if(isBlock[Math.floor((this.y+3)/20)][Math.floor((this.x+3)/20)]){
+    blocks[this.index-1]=new blank(-20,-20,0);
   }
 };
 var cloudLevel2=false;
@@ -149,7 +166,11 @@ player.prototype.display = function() {
   if (input.left) { this.x -= 3; this.direction="left";}
   if (input.right) { this.x += 3; this.direction="right";}
   if(input.attack){
-    this.attacking=true; blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
+    this.attacking=true;
+    if(this.ammo>0&&timer%5===0){
+      blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
+      this.ammo--;
+    }
     this.attacking=false;}
   this.acceleration+=0.17;
   this.y+=this.acceleration;
@@ -168,9 +189,11 @@ player.prototype.display = function() {
   }else if(this.y>canvas.height-21&&cloudLevel){
     this.y=0;
     cloudLevel=false;
+    height--;
   }
   if(this.y<0){
     this.y=canvas.height;
+    height++;
     cloudLevel=true;
   }
   if(this.attacking=true){
@@ -179,6 +202,26 @@ player.prototype.display = function() {
 };
 var player1=new player(0, 380);
 var block=function(x,y,t) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+};
+var supply=function(x,y,t) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+};
+var trampoline=function(x,y,t) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+};
+var wall=function(x,y,t) { 
+  this.x=x;
+  this.y=y;
+  this.t=t;
+};
+var wall=function(x,y,t) { 
   this.x=x;
   this.y=y;
   this.t=t;
@@ -269,6 +312,89 @@ goal.prototype.display = function() {
     levelNum++; 
   }
 };
+trampoline.prototype.display = function() { 
+  if(this.t===0){
+    ctx.fillStyle='rgb(20, 65, 65)';
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillStyle='rgb(18, 58, 58)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(12, 62, 62)';
+    ctx.fillRect(this.x+10, this.y, 10, 10);
+    ctx.fillStyle='rgb(17, 65, 65)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  if(player1.y + 20 > this.y && player1.y < this.y + 21 && player1.x +20 > this.x && player1.x < this.x + 20) { 
+    player1.acceleration =Math.abs(player1.acceleration)*-1.025;
+    player1.jumping = true; 
+  }
+};
+supply.prototype.display = function() { 
+  if(this.t===0){
+    ctx.fillStyle='rgb(150, 0, 0)';
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(200, 200, 200)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillRect(this.x+10, this.y, 10, 10);
+  }
+  if(player1.y < this.y + 20 && player1.y > this.y + 20 && player1.x + 20 > this.x && player1.x < this.x + 20&&player1.acceleration<0) { 
+    player1.ammo=50;
+    player1.hp=20;
+  }
+  if(player1.y + 20 > this.y && player1.y + 19 < this.y + 10 && player1.x + 17 > this.x && player1.x < this.x + 17) { 
+    player1.ammo=50;
+    player1.hp=20;
+  }
+  if (player1.x > this.x + 10 && player1.x < this.x + 20 && player1.y + 19 > this.y && player1.y < this.y + 19) {
+    player1.ammo=50;
+    player1.hp=20;
+  }
+  if(player1.x + 20 > this.x && player1.x + 20 < this.x + 10 && player1.y + 19 > this.y && player1.y < this.y + 19) { 
+    player1.ammo=50;
+    player1.hp=20;
+  }
+};
+wall.prototype.display = function() { 
+  if(this.t===0){
+    ctx.fillStyle='rgb(70, 70, 70)';
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillStyle='rgb(58, 58, 58)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(62, 62, 62)';
+    ctx.fillRect(this.x+10, this.y, 10, 10);
+    ctx.fillStyle='rgb(67, 67, 67)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillStyle='rgba(0,0,0,50)';
+    ctx.fillRect(this.x,this.y,20,20);
+  }
+  if(this.t===1){
+    ctx.fillStyle='rgb(230, 240, 240)';
+    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillStyle='rgb(240, 245, 245)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillRect(this.x+10, this.y, 10, 10);
+    ctx.fillStyle='rgb(240, 250, 250)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  if(this.t===2){
+    ctx.fillStyle='rgb(167, 132, 20)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(166, 127, 0)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(175, 134, 20)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  if(this.t===3){
+    ctx.fillStyle='rgb(165, 123, 0)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(175, 134, 20)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(166, 127, 0)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  ctx.fillStyle='rgba(50,50,50,0.30)';
+  ctx.fillRect(this.x,this.y,20,20);
+}
 block.prototype.display = function() { 
   if(this.t===0){
     ctx.fillStyle='rgb(70, 70, 70)';
@@ -290,8 +416,29 @@ block.prototype.display = function() {
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   if(this.t===2){
-    ctx.fillStyle='rgb(120, 120, 120)';
-    ctx.fillRect(this.x, this.y, 20, 20);
+    ctx.fillStyle='rgb(167, 132, 20)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(166, 127, 0)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(175, 134, 20)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  if(this.t===3){
+    ctx.fillStyle='rgb(163, 120, 0)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(175, 134, 20)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(166, 127, 0)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+  }
+  if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20&&player1.acceleration<0) { 
+    player1.y = this.y + 20;
+    player1.acceleration = 0;
+  }
+  if(player1.y + 20 > this.y && player1.y + 19 < this.y + 10 && player1.x + 17 > this.x && player1.x < this.x + 17) { 
+    player1.y = this.y - 20;
+    player1.acceleration = 0;
+    player1.jumping = false; 
   }
   if (player1.x > this.x + 10 && player1.x < this.x + 20 && player1.y + 19 > this.y && player1.y < this.y + 19) {
     player1.x = this.x + 20; 
@@ -299,30 +446,43 @@ block.prototype.display = function() {
   if(player1.x + 20 > this.x && player1.x + 20 < this.x + 10 && player1.y + 19 > this.y && player1.y < this.y + 19) { 
     player1.x = this.x - 20; 
   }
-  if(player1.y < this.y + 20 && player1.y > this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20&&player1.acceleration<0) { 
-    player1.y = this.y + 20;
-    player1.acceleration = 0;
-  }
-  if(player1.y + 20 > this.y && player1.y + 20 < this.y + 10 && player1.x + 20 > this.x && player1.x < this.x + 20) { 
-    player1.y = this.y - 20;
-    player1.acceleration = 0;
-    player1.jumping = false; 
-  }
 };
 var reload=function(a){
   blocks = [];
   for (var y = 0;y < level.length; y++) {
     for (var x = 0;x < level[y].length; x++) {
-      if (level[y][x]==="x") { 
+      isBlock[y][x]=false;
+      if (level[y][x]==="1") { 
         blocks.push(new block(x*20,y*20,0)); 
-      }else if(level[y][x]==="o"){
+        isBlock[y][x]=true;
+      }else if(level[y][x]==="2"){
         blocks.push(new block(x*20,y*20,1));
+        isBlock[y][x]=true;
       }else if(level[y][x]==="l"){
         blocks.push(new lava(x*20,y*20,0));
+        isBlock[y][x]=true;
       }else if(level[y][x]==="g"){
         blocks.push(new goal(x*20,y*20,0));
-      }else if(level[y][x]==="b"){
+        isBlock[y][x]=true;
+      }else if(level[y][x]==="3"){
         blocks.push(new block(x*20,y*20,2));
+        isBlock[y][x]=true;
+      }else if(level[y][x]==="4"){
+        blocks.push(new block(x*20,y*20,3));
+        isBlock[y][x]=true;
+      }else if(level[y][x]==="-"){
+        blocks.push(new wall(x*20,y*20,0));
+      }else if(level[y][x]==="_"){
+        blocks.push(new wall(x*20,y*20,1));
+      }else if(level[y][x]===","){
+        blocks.push(new wall(x*20,y*20,2));
+      }else if(level[y][x]==="."){
+        blocks.push(new wall(x*20,y*20,3));
+      }else if(level[y][x]==="t"){
+        blocks.push(new trampoline(x*20,y*20,0));
+        isBlock[y][x]=true;
+      }else if(level[y][x]==="s"){
+        blocks.push(new supply(x*20,y*20,0));
       }
     }
   }
@@ -357,18 +517,18 @@ draw = function() {
                  }
     reload(1);
   }
-  if(cloudLevel){
-    ctx.fillStyle='rgb(0, 210, 240)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if(height===0){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
   }else{
     ctx.clearRect(0,0,canvas.width,canvas.height);
   }
-  player1.display();
   for (var i = 0;i < blocks.length; i++) {
     blocks[i].display();
   }
+  player1.display();
   ctx.font = '10px sans-serif';
   ctx.fillText(levelNum,2,10);
+  timer++;
   window.requestAnimationFrame(draw);
 };
 window.requestAnimationFrame(draw);
