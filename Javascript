@@ -17,27 +17,27 @@ levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
 var blocks = [];
 var height=0;
-var levels =[[",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              "l.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,4,.,.,.,4,.3",
-              ",.,.,.,.,.,.,.3",
-              ",.,.,.,t,.,.,s3",
-              "343434343434343"]];
+var levels =[[",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              "l.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,4,.,.,.,4,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,t,.,.,.,.,.,.,.,.,.,s3",
+              "34343434343434343434343434343"]];
 var cloudLevels=[[],[],[]];
 var timer=0;
 var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
@@ -122,6 +122,7 @@ function press(evt) {
     case KEY.R: input.attack = true; break;
   }
 }
+var n1="right";
 function release(evt) {
   var code = evt.keyCode;
   switch(code) {
@@ -181,9 +182,9 @@ var npc = function(x, y,t) {
   this.hp=20;
   this.ammo=10;
   this.t=t;
-  this.jump=false;
-  this.left=false;
-  this.right=false;
+  this.jump;
+  this.left;
+  this.right;
   this.dice=function(){
     this.x=-20;
   };
@@ -270,6 +271,7 @@ player.prototype.display = function() {
   if(this.hp<=0){
     this.respawn(startCoords[levelNum].x,startCoords[levelNum].x);
   }
+  this.hp=Math.round(this.hp*100)/100;
 };
 npc.prototype.display = function() { 
   ctx.fillStyle= 'rgb(60, 40, 0)';
@@ -301,6 +303,7 @@ npc.prototype.display = function() {
     this.dice();
   }
   hpBar(this.x,this.y,this.hp,20);
+  this.hp=Math.round(this.hp*100)/100;
 };
 var player1=new player(0, 380);
 var block=function(x,y,t) { 
@@ -355,7 +358,10 @@ lava.prototype.display = function() {
     ctx.fillRect(this.x, this.y+10, 10, 10);
   }
   if(isColliding(player1,this)) { 
-    player1.respawn(levelStartCoords.x,levelStartCoords.y); 
+    player1.respawn(startCoords[levelNum].x,startCoords[levelNum].y); 
+  }
+  if(isColliding(npc1,this)) { 
+    npc1.hp=0;
   }
 };
 spike.prototype.display = function() { 
@@ -368,12 +374,17 @@ spike.prototype.display = function() {
   }
   if(player1.x+20>this.x&&player1.x<this.x+15&&player1.y+20>this.y&&player1.y<this.y+20) { 
     player1.hp-=0.5;
-    if(player1.acceleration>2){
-      player1.acceleration=player1.acceleration*-0.5;
+    if(player1.acceleration>2&&player1.acceleration<=10){
+      player1.acceleration=player1.acceleration*-0.75;
     }
+    player1.hp-=Math.abs(player1.acceleration);
   }
   if(npc1.x+20>this.x&&npc1.x<this.x+15&&npc1.y+20>this.y&&npc1.y<this.y+20) { 
     npc1.hp-=0.5;
+    if(npc1.acceleration>2&&npc1.acceleration<=10){
+      npc1.acceleration=npc1.acceleration*-0.75;
+    }
+    npc1.hp-=Math.abs(npc1.acceleration);
   }
 };
 sign.prototype.display = function() { 
@@ -399,7 +410,7 @@ goal.prototype.display = function() {
     ctx.fillStyle='rgb(0, 200, 130)';
     ctx.fillRect(this.x, this.y+10, 10, 10);
     ctx.fillRect(this.x+10, this.y, 10, 10);
-    ctx.fillStyle='rgb(0, 200, 100)';
+    ctx.fillStyle='rgb(0, 190, 90)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   if(isColliding(player1,this)&&levelNum===levelNum2) { 
@@ -533,12 +544,16 @@ var npc1=new npc(200,380,0);
 //var npc4=new npc(-20,380,0);
 var levelFunctions=[function(){//level specific functions to be run on reload
   if(!cloudLevel){
-    npc1.y=240;
-    npc1.x=140;
+    npc1.y=320;
+    npc1.x=60;
+    if(midB){
+      npc1.right=true;
+      midB=false;
+    }
     //npc1.left=true;
-    npc1.jump=true;
+    //npc1.jump=true;
     blocks.push(new sign(60,380,0,"test"));
-    blocks.push(new spike(180,380,0));
+    blocks.push(new spike(280,380,0));
   }
 },function(){},function(){},function(){},function(){},function(){}];
 var reload=function(a){
@@ -586,6 +601,7 @@ var reload=function(a){
   //blocks.push(npc2);
   //blocks.push(npc3);
   //blocks.push(npc4);
+  midb=true;
   levelFunctions[levelNum]();
   if(isNaN(a)){
     player1.x=levelStartCoords.x;
@@ -627,13 +643,17 @@ draw = function() {
   }
   player1.display();
   if(levelNum===0){
-    /*if(npc1.x<1){
-      npc.left=true;
-      npc.right=false;
-    }*/
-    if(npc1.x>260){
-      npc.right=true;
-      npc.left=false;
+    if(npc1.x<1){
+      n1="right"
+    }else if(npc1.x>540){
+      n1="left";
+    }
+    if(n1==="right"){
+      npc1.left=false;
+      npc1.right=true;
+    }else if(n1==="left"){
+      npc1.right=false;
+      npc1.left=true;
     }
   }
   ctx.font = '10px sans-serif';
