@@ -14,7 +14,7 @@
 var update=true;
 var levelNum=0;
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
-levelStartCoords=startCoords[levelNum];
+levelStartCoords=startCoords[levelNum];//seefieheaofhfreofyurwfw
 var cloudLevel=false;
 var blocks = [];
 var height=0;
