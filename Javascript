@@ -403,7 +403,11 @@ npc.prototype.display = function() {
   if(update){
     if(this.attacking=true){
       ctx.fillStyle='rgb(190,190,190)';
-      ctx.fillRect(this.x+17,this.y+5,10,5);
+      if(this.direction==="right"){
+        ctx.fillRect(this.x+17,this.y+5,10,5);
+      }else{
+        ctx.fillRect(this.x-7,this.y+5,10,5);
+      }
     }
     this.acceleration+=0.17;
     this.y+=this.acceleration;
