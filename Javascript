@@ -14,7 +14,7 @@
 var update=true;
 var levelNum=0;
 var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
-levelStartCoords=startCoords[levelNum];//seefieheaofhfreofyurwfw
+levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
 var blocks = [];
 var height=0;
@@ -34,7 +34,7 @@ var levels =[[",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
               ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
               "l.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
               ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
+              ",.,.,.,.,.,.,.,.,.,.,.,.,.,43",
               ",.,4,.,.,.,4,.,.,.,.,.,.,.,.3",
               ",.,.,.,.,.,.,.,.,4,.,.,.,.,.3",
               ",.,.,.,t,.,.,.,.,.,.,.,.,.,s3",
@@ -180,7 +180,7 @@ var bannerText=function(txt,x,y){
   let text1 = ctx.measureText(txt);
   ctx.font = '15px sans-serif';
   ctx.fillStyle= 'rgb(0, 0, 0)';
-  ctx.fillText(txt,x+10-(text1.width/2),y-10);
+  ctx.fillText(txt,x+10,y-10);
 };
 var interact=false;
 function press(evt) {
@@ -256,7 +256,7 @@ var player = function(x, y) {
   };
   this.sightDistance=200;
 };
-var enemy = function(x, y,t) { 
+var flyEnemy = function(x, y,t) { 
   this.x = x;
   this.y = y;
   this.acceleration = 0;
@@ -269,10 +269,16 @@ var enemy = function(x, y,t) {
   this.jump;
   this.left;
   this.right;
+  this.xeleration=0;
+  this.move=true;
   this.dice=function(){
-    this.x=-20;
+    this.x=-200;
+    this.hp=20;
+    this.xeleration=0;
+    this.move=false;
   };
   this.interact=false;
+  this.AI=true;
 };
 var npc = function(x, y,t,talk) { 
   this.x = x;
@@ -287,13 +293,17 @@ var npc = function(x, y,t,talk) {
   this.jump;
   this.left;
   this.right;
+  this.move=true;
   this.dice=function(){
-    this.x=-20;
+    this.x=-200;
+    this.hp=20;
+    this.move=false;
   };
   this.interact=false;
   this.talk=talk;
   this.dialogue1=["Hello, world!"];
   this.dialogue2=[""];
+  this.opinion=1;
 };
 var attackObj=function(x,y,d,index){
   this.x=x;
@@ -326,6 +336,11 @@ attackObj.prototype.display=function(){
   if(isColliding(npc1,this)){
     npc1.hp--;
     blocks[this.index-1]=new blank(-20,-20,0);
+    npc1.opinion--;
+  }
+  if(isColliding(fly1,this)){
+    fly1.hp--;
+    blocks[this.index-1]=new blank(-20,-20,0);
   }
 };
 var cloudLevel2=false;
@@ -336,7 +351,7 @@ player.prototype.display = function() {
     if (this.y>canvas.height-20) {this.y=canvas.height-20;
       this.acceleration = 0;
       this.jumping = false; }
-    if (input.up && !this.jumping) { this.acceleration = -5;
+    if (input.up && !this.jumping) { this.acceleration = -5.4;
       this.jumping = true; }
     if (input.left) { this.x -= 3; this.direction="left";}
     if (input.right) { this.x += 3; this.direction="right";}
@@ -363,7 +378,6 @@ player.prototype.display = function() {
       this.y=canvas.height;
     }else if(this.y>canvas.height-21&&cloudLevel){
       this.y=0;
-      cloudLevel=false;
       height--;
     }
     if(this.y<0){
@@ -380,39 +394,44 @@ player.prototype.display = function() {
     this.respawn(startCoords[levelNum].x,startCoords[levelNum].x);
   }
   this.hp=Math.round(this.hp*100)/100;
+  this.x=Math.round(this.x);
+  this.x=Math.round(this.x);
 };
 npc.prototype.display = function() { 
   ctx.fillStyle= 'rgb(60, 40, 0)';
   ctx.fillRect(this.x, this.y, 20, 20);
   if(update){
     if(this.attacking=true){
-
+      ctx.fillStyle='rgb(190,190,190)';
+      ctx.fillRect(this.x+17,this.y+5,10,5);
     }
     this.acceleration+=0.17;
     this.y+=this.acceleration;
-    if (this.jump && !this.jumping) {
-      this.acceleration = -5;
-      this.jumping = true;
-    }
-    if (this.left) {
-      this.x -= 3;
-      this.direction="left";
-    }
-    if (this.right) {
-      this.x += 3;
-      this.direction="right";
-    }
-    if(this.x<0){
-      this.x=0;
-    }
-    if(this.x>canvas.width-20){
-      this.x=canvas.width-20;
+    if(this.move){
+      if (this.jump && !this.jumping) {
+        this.acceleration = -5;
+        this.jumping = true;
+      }
+      if (this.left) {
+        this.x -= 3;
+        this.direction="left";
+      }
+      if (this.right) {
+        this.x += 3;
+        this.direction="right";
+      }
+      if(this.x<0){
+        this.x=0;
+      }
+      if(this.x>canvas.width-20){
+        this.x=canvas.width-20;
+      }
     }
     if(this.hp<=0){
       this.dice();
     }
   }
-  if(isColliding(player1,this)){
+  if(isColliding(player1,this)&&this.opinion>0){
     bannerText("press x",this.x,this.y);
     if(input.x){
       update=false;
@@ -433,7 +452,76 @@ npc.prototype.display = function() {
     }
   }
 };
+flyEnemy.prototype.display = function() { 
+  ctx.fillStyle= 'rgb(190, 80, 0)';
+  ctx.fillRect(this.x, this.y, 20, 20);
+  if(update){
+    if(this.attacking=true){
+
+    }
+    this.acceleration+=0.17;
+    if(this.xeleration>0){
+      this.xeleration-=0.17;
+    }
+    if(this.xeleration<0){
+      this.xeleration+=0.17;
+    }
+    this.x+=this.xeleration;
+    if(this.move){
+      if(!this.AI){
+        if (this.jump) {
+          this.acceleration = -2;
+          this.jumping = true;
+        }
+        if (this.left) {
+          this.xeleration = -2;
+          this.direction="left";
+        }
+        if (this.right) {
+          this.xeleration = 2;
+          this.direction="right";
+        }
+      }
+      if(this.AI){
+        if(player1.x>this.x){
+          this.xeleration=2;
+        }
+        if(player1.x<this.x){
+          this.xeleration=-2;
+        }
+        if(player1.y<this.y){
+          this.acceleration =-2;
+        }
+        if(this.acceleration>5){
+          this.acceleration =-1;
+        }
+      }
+      if(this.x<0){
+        this.x=0;
+      }
+      if(this.x>canvas.width-20){
+        this.x=canvas.width-20;
+      }
+    }
+    if(this.hp<=0){
+      this.dice();
+      npc1.opinion++;
+    }
+    this.y+=this.acceleration;
+  }
+  if(isColliding(player1,this)){
+    player1.hp-=0.5;
+  }
+  if(isColliding(npc1,this)){
+    npc1.hp-=0.5;
+  }
+  this.hp=Math.round(this.hp*100)/100;
+  if(Math.sqrt((this.x-player1.x)*(this.x-player1.x)+(this.y-player1.y)*(this.y-player1.y))<player1.sightDistance){
+    hpBar(this.x,this.y,this.hp,20);
+  }
+};
 var player1=new player(0, 380);
+var fly1=new flyEnemy(600, 80);
 var block=function(x,y,t) { 
   this.x=x;
   this.y=y;
@@ -508,19 +596,26 @@ spike.prototype.display = function() {
     ctx.fillRect(this.x+5, this.y+10, 10, 10);
   }
   if(update){
-    if(player1.x+20>this.x&&player1.x<this.x+15&&player1.y+20>this.y&&player1.y<this.y+20) { 
+    if(isColliding(player1,this)) { 
       player1.hp-=0.5;
       if(player1.acceleration>2&&player1.acceleration<=10){
         player1.acceleration=player1.acceleration*-0.75;
       }
       player1.hp-=Math.abs(player1.acceleration);
     }
-    if(npc1.x+20>this.x&&npc1.x<this.x+15&&npc1.y+20>this.y&&npc1.y<this.y+20) { 
+    if(isColliding(npc1,this)) { 
       npc1.hp-=0.5;
       if(npc1.acceleration>2&&npc1.acceleration<=10){
         npc1.acceleration=npc1.acceleration*-0.75;
       }
       npc1.hp-=Math.abs(npc1.acceleration);
+    }
+    if(isColliding(fly1,this)) { 
+      fly1.hp-=0.5;
+      if(fly1.acceleration>2&&fly1.acceleration<=10){
+        fly1.acceleration=fly1.acceleration*-0.75;
+      }
+      fly1.hp-=Math.abs(fly1.acceleration);
     }
   }
 };
@@ -571,8 +666,12 @@ trampoline.prototype.display = function() {
       player1.jumping = true; 
     }
     if(isColliding(npc1,this)) {
-      npc1.acceleration =Math.abs(npc1.acceleration)*-1.02499;
+      npc1.acceleration =Math.abs(npc1.acceleration)*-1.025;
       npc1.jumping = true; 
+    }
+    if(isColliding(fly1,this)) {
+      fly1.acceleration =Math.abs(fly1.acceleration)*-1.025;
+      fly1.jumping = true; 
     }
   }
 };
@@ -625,31 +724,29 @@ wall.prototype.display = function() {
     ctx.fillRect(this.x+10, this.y, 10, 10);
     ctx.fillStyle='rgb(67, 67, 67)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
-    ctx.fillStyle='rgba(0,0,0,50)';
-    ctx.fillRect(this.x,this.y,20,20);
   }
   if(this.t===1){
     ctx.fillStyle='rgb(230, 240, 240)';
-    ctx.fillRect(this.x, this.y, 10, 10);
+    ctx.fillRect(this.x,this.y,10,10);
     ctx.fillStyle='rgb(240, 245, 245)';
-    ctx.fillRect(this.x, this.y+10, 10, 10);
-    ctx.fillRect(this.x+10, this.y, 10, 10);
+    ctx.fillRect(this.x,this.y+10,10,10);
+    ctx.fillRect(this.x+10,this.y,10,10);
     ctx.fillStyle='rgb(240, 250, 250)';
-    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillRect(this.x+10,this.y+10,10,10);
   }
   if(this.t===2){
     ctx.fillStyle='rgb(167, 142, 60)';
-    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillRect(this.x,this.y,20,10);
     ctx.fillStyle='rgb(166, 137, 40)';
-    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillRect(this.x,this.y+10,10,10);
     ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillRect(this.x+10,this.y+10,10,10);
   }
   if(this.t===3){
     ctx.fillStyle='rgb(165, 133, 40)';
-    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillRect(this.x,this.y,20,10);
     ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillRect(this.x,this.y+10,10,10);
     ctx.fillStyle='rgb(166, 137, 40)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
@@ -694,6 +791,7 @@ block.prototype.display = function() {
   }
   player1=collide(player1,this);
   npc1=collide(npc1,this);
+  fly1=collide(fly1,this);
   //npc2=collide(npc2,this);
   //npc3=collide(npc3,this);
   //npc4=collide(npc4,this);
@@ -706,6 +804,8 @@ var levelFunctions=[function(){//level specific functions to be run on reload
   if(!cloudLevel){
     npc1.y=320;
     npc1.x=60;
+    fly1.x=460;
+    fly1.y=80;
     if(midB){
       npc1.right=true;
       midB=false;
@@ -759,7 +859,8 @@ var reload=function(a){
     }
   }
   npc1.acceleration=0;
-  npc1.hp=20;
+  fly1.xeleration=0;
+  fly1.acceleration=0;
   //blocks.push(npc1);
   //blocks.push(npc2);
   //blocks.push(npc3);
@@ -770,6 +871,11 @@ var reload=function(a){
     player1.x=levelStartCoords.x;
     player1.y=levelStartCoords.y;
     player1.acceleration = 0;
+    npc1.hp=20;
+    npc1.move=true;
+    npc1.opinion=1;
+    fly1.move=true;
+    fly1.hp=20;
   }
 }
 reload();
@@ -777,23 +883,11 @@ var levelNum2=levelNum;
 draw = function() { 
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
-  if(levelNum!==levelNum2){
-    if(!cloudLevel){
-    level=levels[levelNum];
-  }else{
-    level=cloudLevels[levelNum];
-  }
-  levelStartCoords.x=startCoords[levelNum].x;
-  levelStartCoords.y=startCoords[levelNum].y;
-    levelNum2=levelNum;
-    reload();
-  }
-  if(cloudLevel2!==cloudLevel){
-    cloudLevel2=cloudLevel;
-   if(cloudLevel){ level=cloudLevels[levelNum];
-                 }else{
-                   level=levels[levelNum];
-                 }
+  if(height!==levelNum2){
+    level=levels[height];
+    levelStartCoords.x=startCoords[height].x;
+    levelStartCoords.y=startCoords[height].y;
+    levelNum2=height;
     reload(1);
   }
   if(height===0){
@@ -806,7 +900,8 @@ draw = function() {
   }
   player1.display();
   npc1.display();
-  if(levelNum===0){
+  fly1.display();
+  if(height===0){
     if(npc1.x<1){
       n1="right"
     }else if(npc1.x>540){
@@ -824,8 +919,8 @@ draw = function() {
   }//2b+2b+8b=19.99
   ctx.font = '10px sans-serif';//11b+11b+11b+3b=19.61
   ctx.fillText(input.z,2,10);//3b+3b+3b+11b=19.99
-  ctx.fillText(player1.hp,2,20);//
-  ctx.fillText(input.x,2,30);
+  ctx.fillText(player1.hp,2,20);//small fall+small fall+small fall+run=
+  ctx.fillText(npc1.opinion,2,30);
   interact=false;
   talkT--;
   if(talkT<=0){
