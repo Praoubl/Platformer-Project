@@ -13,32 +13,33 @@
 //signs, spikes and teleporters should be in the level functions
 var update=true;
 var levelNum=0;
-var startCoords=[{x:0,y:380},{x:0,y:80},{x:0,y:500}];
+var startCoords=[{x:100,y:380},{x:0,y:80},{x:0,y:500}];
 levelStartCoords=startCoords[levelNum];
 var cloudLevel=false;
 var blocks = [];
 var height=0;
-var levels =[[",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              "l.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,.,.,.,.,.,43",
-              ",.,4,.,.,.,4,.,.,.,.,.,.,.,.3",
-              ",.,.,.,.,.,.,.,.,4,.,.,.,.,.3",
-              ",.,.,.,t,.,.,.,.,.,.,.,.,.,s3",
-              "34343434343434343434343434343"]];
+var levels =[["34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34343434343434343434343434343",
+              "34,.,.,.,.3.,.,.,.3.,.,.,.,43",
+              "34,.,.,.,.3.,.,.,.3.,.,.,.,43",
+              "34,.,.,.,.3.,.,.,.3.,.,.,.,43",
+              "34343.,.343.,43434343.,.34343",
+              "34,.,.,.3.,.,.,.,.,.3.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,4343434343434343434,.,43",
+              "34,.,.,.,.,.,.3.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.3.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.3.,.,.,.,.,.,43",
+              "343434343.,.34343.,.343434343",
+              "34,.,.,.3.,.,.,.,.,.3.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+              "34,.,.,.,.,.,.,.,.,.,.,.,.s43",
+              "34343434343434343434343434343"
+]];
 var cloudLevels=[[],[],[]];
 var timer=0;
 var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
@@ -160,6 +161,7 @@ var input = {
   x:false,
   z:false,
   c:false,
+  e:false,
 };
 var KEY = {
   D: 68,
@@ -175,6 +177,7 @@ var KEY = {
   X:88,
   Z:90,
   C:67,
+  E:69,
 };
 var bannerText=function(txt,x,y){
   let text1 = ctx.measureText(txt);
@@ -183,23 +186,25 @@ var bannerText=function(txt,x,y){
   ctx.fillText(txt,x+10,y-10);
 };
 var interact=false;
+var kc=0;
 function press(evt) {
   var code = evt.keyCode;
   switch(code) {
     case KEY.RIGHT:
-    case KEY.D: input.right = true; break;
+    case KEY.D: input.right = true; if(kc<6||kc>=8){kc=0;} if(kc>=6&&kc<8){kc++;} break;
     case KEY.UP:
-    case KEY.W: input.up = true; break;
+    case KEY.W: input.up = true; if(kc>=2){kc=0;} if(kc<2){kc++;} ;break;
     case KEY.LEFT:
-    case KEY.A: input.left = true; break;
+    case KEY.A: input.left = true; if(kc<4||kc>=6){kc=0;} if(kc>=4&&kc<6){kc++;} break;
     case KEY.DOWN:
-    case KEY.S: input.down = true; break;
-    case KEY.Q: input.restart = true; break;      
-    case KEY.R: input.attack = true; break;
-    case KEY.X: input.x = true; break;
-    case KEY.Z: input.z = true; break;
-    case KEY.C: input.c = true; break;
-    case KEY.X: interact = true; break;
+    case KEY.S: input.down = true; if(kc<2||kc>=4){kc=0;} if(kc>=2&&kc<4){kc++;} break;
+    case KEY.Q: input.restart = true; kc=0; break;      
+    case KEY.R: input.attack = true; kc=0; break;
+    case KEY.X: input.x = true; if(kc<8||kc>=9){kc=0;} if(kc<=8&&kc<9){kc++;} break;
+    case KEY.Z: input.z = true; if(kc<9||kc>=10){kc=0;} if(kc<=9&&kc<10){kc++;} break;
+    case KEY.C: input.c = true; kc=0; break;
+    case KEY.E: input.e = true; kc=0; break;
+    case KEY.X: interact = true; kc=0; break;
   }
 }
 var n1="right";
@@ -219,8 +224,18 @@ function release(evt) {
     case KEY.X: input.x = false; break;
     case KEY.Z: input.z = false; break;
     case KEY.C: input.c = false; break;
+    case KEY.E: input.e = false; break;
   }
 }
+var inventoryf=function(){
+  ctx.fillStyle='rgba(50,50,50,0.3)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='rgb(250,250,250)';
+  ctx.fillStyle='rgb(20,20,20)';
+  ctx.lineWidth=4;
+  ctx.fillRect(canvas.width/6,canvas.height/6,2*canvas.width/3,2*canvas.height/3);
+  ctx.strokeRect(canvas.width/6,canvas.height/6,2*canvas.width/3,2*canvas.height/3);
+};//^^vv<<>>xz
 var hpBar=function(x1,y1,hp1,max1){
   ctx.fillStyle='rgb(255,0,0)';
   if(hp1/max1>0.25&&hp1/max1<0.5){
@@ -242,6 +257,7 @@ var player = function(x, y) {
   this.jumping = true;
   this.direction="right";
   this.attacking=false;
+  this.inventory=false;
   this.hp=20;
   this.ammo=10;
   this.maxHp=20;
@@ -294,16 +310,17 @@ var npc = function(x, y,t,talk) {
   this.left;
   this.right;
   this.move=true;
+  this.opinion=1;
   this.dice=function(){
     this.x=-200;
     this.hp=20;
     this.move=false;
+    this.opinion=0;
   };
   this.interact=false;
   this.talk=talk;
   this.dialogue1=["Hello, world!"];
   this.dialogue2=[""];
-  this.opinion=1;
 };
 var attackObj=function(x,y,d,index){
   this.x=x;
@@ -347,6 +364,7 @@ var cloudLevel2=false;
 player.prototype.display = function() { 
   ctx.fillStyle= 'rgb(20, 20, 20)';
   ctx.fillRect(this.x, this.y, 20, 20);
+  hpBar(this.x,this.y,this.hp,this.maxHp);
   if(update){
     if (this.y>canvas.height-20) {this.y=canvas.height-20;
       this.acceleration = 0;
@@ -361,7 +379,8 @@ player.prototype.display = function() {
         blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
         this.ammo--;
       }
-      this.attacking=false;}
+      this.attacking=false;
+    }
     this.acceleration+=0.17;
     this.y+=this.acceleration;
     if(input.restart){
@@ -388,8 +407,23 @@ player.prototype.display = function() {
     if(this.attacking=true){
 
     }
+    if(kc===10){
+      this.hp=9999;
+      this.ammo=9999;
+      kc=0;
+    }
   }
-  hpBar(this.x,this.y,this.hp,this.maxHp);
+  if(input.e){
+    this.inventory=true;
+    update=false;
+  }
+  if(this.inventory){
+    inventoryf();
+    if(input.z){
+      update=true;
+      this.inventory=false;
+    }
+  }
   if(this.hp<=0){
     this.respawn(startCoords[levelNum].x,startCoords[levelNum].x);
   }
@@ -400,28 +434,67 @@ player.prototype.display = function() {
 npc.prototype.display = function() { 
   ctx.fillStyle= 'rgb(60, 40, 0)';
   ctx.fillRect(this.x, this.y, 20, 20);
+  if(Math.sqrt((this.x-player1.x)*(this.x-player1.x)+(this.y-player1.y)*(this.y-player1.y))<player1.sightDistance){
+    hpBar(this.x,this.y,this.hp,20);
+  }
   if(update){
-    if(this.attacking=true){
+    if(this.opinion<0){
+      this.attacking=true;
+      this.left=false;
+      this.right=true;
+      this.jump=false;
+      this.move=false;
+      if(this.x>player1.x){
+        this.x -= 2.5;
+        this.direction="left";
+      }
+      if(this.x<player1.x){
+        this.x += 2.5;
+        this.direction="right";
+      }
+      if(this.y>player1.y&&!this.jumping){
+        this.acceleration = -5.4;
+        this.jumping = true;
+      }
+    }else{
+      this.attacking=false;
+    }
+    if(this.attacking===true){
       ctx.fillStyle='rgb(190,190,190)';
+      if(this.opinion>=0){
+        this.attacking=false;
+      }
       if(this.direction==="right"){
         ctx.fillRect(this.x+17,this.y+5,10,5);
+        if(player1.x+20>this.x+17&&player1.x<this.x+27&&player1.y+20>this.y+5&&player1.y<this.y+10){
+          player1.hp-=0.5;
+        }
+        if(fly1.x+20>this.x+17&&fly1.x<this.x+27&&fly1.y+20>this.y+5&&fly1.y<this.y+10){
+          fly1.hp-=0.5;
+        }
       }else{
         ctx.fillRect(this.x-7,this.y+5,10,5);
+        if(player1.x+20>this.x-7&&player1.x<this.x+3&&player1.y+20>this.y+5&&player1.y<this.y+10){
+          player1.hp-=0.25;
+        }
+        if(fly1.x+20>this.x-7&&fly1.x<this.x+3&&fly1.y+20>this.y+5&&fly1.y<this.y+10){
+          fly1.hp-=0.25;
+        }
       }
     }
     this.acceleration+=0.17;
     this.y+=this.acceleration;
     if(this.move){
       if (this.jump && !this.jumping) {
-        this.acceleration = -5;
+        this.acceleration = -5.4;
         this.jumping = true;
       }
       if (this.left) {
-        this.x -= 3;
+        this.x -= 2;
         this.direction="left";
       }
       if (this.right) {
-        this.x += 3;
+        this.x += 2;
         this.direction="right";
       }
       if(this.x<0){
@@ -444,9 +517,6 @@ npc.prototype.display = function() {
     }
   }
   this.hp=Math.round(this.hp*100)/100;
-  if(Math.sqrt((this.x-player1.x)*(this.x-player1.x)+(this.y-player1.y)*(this.y-player1.y))<player1.sightDistance){
-    hpBar(this.x,this.y,this.hp,20);
-  }
   if(this.talk){
     dialogue(this.dialogue1,this.dialogue2);
     if(input.z){
@@ -459,6 +529,9 @@ npc.prototype.display = function() {
 flyEnemy.prototype.display = function() { 
   ctx.fillStyle= 'rgb(190, 80, 0)';
   ctx.fillRect(this.x, this.y, 20, 20);
+  if(Math.sqrt((this.x-player1.x)*(this.x-player1.x)+(this.y-player1.y)*(this.y-player1.y))<player1.sightDistance){
+    hpBar(this.x,this.y,this.hp,20);
+  }
   if(update){
     if(this.attacking=true){
 
@@ -520,9 +593,6 @@ flyEnemy.prototype.display = function() {
     npc1.hp-=0.5;
   }
   this.hp=Math.round(this.hp*100)/100;
-  if(Math.sqrt((this.x-player1.x)*(this.x-player1.x)+(this.y-player1.y)*(this.y-player1.y))<player1.sightDistance){
-    hpBar(this.x,this.y,this.hp,20);
-  }
 };
 var player1=new player(0, 380);
 var fly1=new flyEnemy(600, 80);
@@ -589,6 +659,9 @@ lava.prototype.display = function() {
   }
   if(isColliding(npc1,this)) { 
     npc1.hp=0;
+  }
+  if(isColliding(fly1,this)) { 
+    fly1.hp=0;
   }
 };
 spike.prototype.display = function() { 
@@ -689,8 +762,12 @@ supply.prototype.display = function() {
     ctx.fillRect(this.x+10, this.y, 10, 10);
   }
   if(isColliding(player1,this)) {
-    player1.ammo=50;
-    player1.hp=20;
+    if(player1.ammo<50){
+      player1.ammo=50;
+    }
+    if(player1.maxHp>player1.hp){
+      player1.hp=player1.maxHp;
+    }
   }
   if(isColliding(npc1,this)) {
     npc1.ammo=50;
@@ -804,6 +881,14 @@ var npc1=new npc(200,380,0);
 //var npc2=new npc(-20,380,0);
 //var npc3=new npc(-20,380,0);
 //var npc4=new npc(-20,380,0);
+var mouseX;
+var mouseY;
+function mouseMoveHandler(e) {
+  mouseX = e.clientX - canvas.offsetLeft;
+  mouseY = e.clientY - canvas.offsetTop;
+}
+document.addEventListener("mousemove", mouseMoveHandler, false);
+/*=======================================================================*/
 var levelFunctions=[function(){//level specific functions to be run on reload
   if(!cloudLevel){
     npc1.y=320;
@@ -818,7 +903,8 @@ var levelFunctions=[function(){//level specific functions to be run on reload
     //npc1.jump=true;
     blocks.push(new sign(60,380,0,"test"));
     blocks.push(new spike(280,380,0));
-    blocks.push(new teleporter(400,380,0,140,100));
+    blocks.push(new teleporter(280,60,0,300,140));
+    blocks.push(new teleporter(280,140,0,300,60));
     npc1.dialogue1=["Hello","My job is to walk back and forth in this","I'm very bored"]
     npc1.dialogue2=[" ","spot"," "];
   }
@@ -870,6 +956,7 @@ var reload=function(a){
   //blocks.push(npc3);
   //blocks.push(npc4);
   midb=true;
+  kc=0;
   levelFunctions[levelNum]();
   if(isNaN(a)){
     player1.x=levelStartCoords.x;
@@ -902,14 +989,19 @@ draw = function() {
   for (var i = 0;i < blocks.length; i++) {
     blocks[i].display();
   }
-  player1.display();
   npc1.display();
   fly1.display();
+  player1.display();
   if(height===0){
-    if(npc1.x<1){
+    if(npc1.x<41){
       n1="right"
-    }else if(npc1.x>540){
+    }else if(npc1.x>520){
       n1="left";
+    }
+    if(npc1.x>240&&npc1.x<300){
+      npc.jump=true;
+    }else{
+      npc1.jump=false;
     }
     if(n1==="right"){
       npc1.left=false;
@@ -922,9 +1014,12 @@ draw = function() {
     }//hop+jump+run=19.78 (order matters)
   }//2b+2b+8b=19.99
   ctx.font = '10px sans-serif';//11b+11b+11b+3b=19.61
-  ctx.fillText(input.z,2,10);//3b+3b+3b+11b=19.99
+  ctx.fillText(input.e,2,10);//3b+3b+3b+11b=19.99
   ctx.fillText(player1.hp,2,20);//small fall+small fall+small fall+run=
   ctx.fillText(npc1.opinion,2,30);
+  ctx.fillText(kc,2,40);
+  ctx.fillText(mouseX,2,50);
+  ctx.fillText(mouseY,2,60);
   interact=false;
   talkT--;
   if(talkT<=0){
@@ -937,4 +1032,5 @@ draw = function() {
   timer++;
   window.requestAnimationFrame(draw);
 };
+
 window.requestAnimationFrame(draw);
