@@ -1103,8 +1103,8 @@ function(a){//level specific functions to be run on reload
   if(midB){
     
     //npc1.left=true;
-    //npc1.jump=true;
-    midB=false;
+    //npc1.jump=true;//jgdkjgdhjmmtrdjfvuyftyibkytfyrdkjh
+    midB=false;//jkyegkhjryghkmjymkyd
   }
 },function(){},function(){},function(){},function(){},function(){}];
 var reload=function(a){
@@ -1265,5 +1265,4 @@ draw = function() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   window.requestAnimationFrame(draw);
 };
-
 window.requestAnimationFrame(draw);
