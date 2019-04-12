@@ -1258,9 +1258,9 @@ draw = function() {
     talkT--;
   }
   //reload();
-  //height=0;
+  //height=0;//khdsyuhgffgkthgswfsghdfnty
   talkT2++;
-  timer++;
+  timer++;//iyrteahsjytufkg,ykmngv
   //ctx.translate(-player1.x,-player1.y);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   window.requestAnimationFrame(draw);
