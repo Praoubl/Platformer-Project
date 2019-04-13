@@ -1252,14 +1252,14 @@ draw = function() {
   interact=false;
   talkT--;
   if(talkT<=0){
-    talkNum2=talkNum;
+    talkNum2=talkNum;//uhyg
     talkT=25;
   }else{
     talkT--;
   }
   //reload();
   //height=0;//khdsyuhgffgkthgswfsghdfnty
-  talkT2++;
+  talkT2++;//ythujuyyjtasgdvybub
   timer++;//iyrteahsjytufkg,ykmngv
   //ctx.translate(-player1.x,-player1.y);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
