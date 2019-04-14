@@ -1257,9 +1257,9 @@ draw = function() {
   }else{
     talkT--;
   }
-  //reload();
-  //height=0;//khdsyuhgffgkthgswfsghdfnty
-  talkT2++;//ythujuyyjtasgdvybub
+  //reload();//uyrrersdifkytsrjtr
+  //height=0;
+  talkT2++;//ythujuyyjtasgkyrd
   timer++;//iyrteahsjytufkg,ykmngv
   //ctx.translate(-player1.x,-player1.y);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
