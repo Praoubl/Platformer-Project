@@ -968,31 +968,31 @@ wall.prototype.display = function() {
     ctx.fillRect(this.x+10,this.y+10,10,10);
   }
   if(this.t===2){
-    ctx.fillStyle='rgb(167, 142, 60)';
-    ctx.fillRect(this.x,this.y,20,10);
-    ctx.fillStyle='rgb(166, 137, 40)';
-    ctx.fillRect(this.x,this.y+10,10,10);
-    ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x+10,this.y+10,10,10);
-    ctx.fillStyle='rgb(167, 142, 60)';
-    ctx.fillRect(this.x,this.y,20,10);
-    ctx.fillStyle='rgb(166, 137, 40)';
-    ctx.fillRect(this.x,this.y+10,10,10);
-    ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x+10,this.y+10,10,10);
+    ctx.fillStyle='rgb(177, 142, 60)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(176, 137, 40)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(185, 144, 60)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(177, 142, 60)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(176, 137, 40)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(185, 144, 60)';
+    ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   if(this.t===3){
-    ctx.fillStyle='rgb(165, 133, 40)';
-    ctx.fillRect(this.x,this.y,20,10);
-    ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x,this.y+10,10,10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(175, 133, 40)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(185, 144, 60)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(165, 133, 40)';
-    ctx.fillRect(this.x,this.y,20,10);
-    ctx.fillStyle='rgb(175, 144, 60)';
-    ctx.fillRect(this.x,this.y+10,10,10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(175, 133, 40)';
+    ctx.fillRect(this.x, this.y, 20, 10);
+    ctx.fillStyle='rgb(185, 144, 60)';
+    ctx.fillRect(this.x, this.y+10, 10, 10);
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   ctx.fillStyle='rgba(50,50,50,0.30)';
@@ -1036,31 +1036,31 @@ block.prototype.display = function() {
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   if(this.t===2){
-    ctx.fillStyle='rgb(167, 142, 60)';
+    ctx.fillStyle='rgb(177, 142, 60)';
     ctx.fillRect(this.x, this.y, 20, 10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(175, 144, 60)';
+    ctx.fillStyle='rgb(185, 144, 60)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(167, 142, 60)';
+    ctx.fillStyle='rgb(177, 142, 60)';
     ctx.fillRect(this.x, this.y, 20, 10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(175, 144, 60)';
+    ctx.fillStyle='rgb(185, 144, 60)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   if(this.t===3){
-    ctx.fillStyle='rgb(165, 133, 40)';
+    ctx.fillStyle='rgb(175, 133, 40)';
     ctx.fillRect(this.x, this.y, 20, 10);
-    ctx.fillStyle='rgb(175, 144, 60)';
+    ctx.fillStyle='rgb(185, 144, 60)';
     ctx.fillRect(this.x, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(165, 133, 40)';
+    ctx.fillStyle='rgb(175, 133, 40)';
     ctx.fillRect(this.x, this.y, 20, 10);
-    ctx.fillStyle='rgb(175, 144, 60)';
+    ctx.fillStyle='rgb(185, 144, 60)';
     ctx.fillRect(this.x, this.y+10, 10, 10);
-    ctx.fillStyle='rgb(166, 137, 40)';
+    ctx.fillStyle='rgb(176, 137, 40)';
     ctx.fillRect(this.x+10, this.y+10, 10, 10);
   }
   player1=collide(player1,this);
@@ -1103,8 +1103,8 @@ function(a){//level specific functions to be run on reload
   if(midB){
     
     //npc1.left=true;
-    //npc1.jump=true;//jgdkjgdhjmmtrdjfvuyftyibkytfyrdkjh
-    midB=false;//jkyegkhjryghkmjymkyd
+    //npc1.jump=true;
+    midB=false;
   }
 },function(){},function(){},function(){},function(){},function(){}];
 var reload=function(a){
@@ -1215,7 +1215,7 @@ draw = function() {
     extraBlocks[i].display();
   }
   for (var i = 0;i < gravityBlocks.length; i++) {
-    gravityBlocks[i].display();
+    gravityBlocks[i].display();//yjod yslrd qasvr sgyrt yjr zryrptd gtpz s drddopm om yjr drbrmyj shr
   }
   ctx.font = '10px sans-serif';//11b+11b+11b+3b=19.61
   ctx.fillText(input.restart,2,10);//3b+3b+3b+11b=19.99
@@ -1252,17 +1252,18 @@ draw = function() {
   interact=false;
   talkT--;
   if(talkT<=0){
-    talkNum2=talkNum;//uhyg
+    talkNum2=talkNum;
     talkT=25;
   }else{
     talkT--;
   }
-  //reload();//uyrrersdifkytsrjtr
+  //reload();
   //height=0;
-  talkT2++;//ythujuyyjtasgkyrd
-  timer++;//iyrteahsjytufkg,ykmngv
+  talkT2++;
+  timer++;
   //ctx.translate(-player1.x,-player1.y);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   window.requestAnimationFrame(draw);
 };
+
 window.requestAnimationFrame(draw);
