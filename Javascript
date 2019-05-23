@@ -293,6 +293,8 @@ var player = function(x, y) {
   };
   this.sightDistance=200;
   this.items=[];
+  this.img=new Image();
+  this.img.src='https://i.postimg.cc/MZ0nMHB7/IMG-1348-1.png';//'https://imgur.com/a/bVT35HX.png';
 };
 var flyEnemy = function(x, y,t) { 
   this.x = x;
@@ -380,6 +382,7 @@ attackObj.prototype.display=function(){
   for(var i=0;i<gravityBlocks.length;i++){
     if(isColliding(gravityBlocks[i],this)){
       blocks[this.index-1]=new blank(-20,-20,0);
+      gravityBlocks[i].hp--;
     }
   }
   if(isColliding(fly1,this)){
@@ -389,8 +392,9 @@ attackObj.prototype.display=function(){
 };
 var cloudLevel2=false;
 player.prototype.display = function() { 
-  ctx.fillStyle= 'rgb(20, 20, 20)';
-  ctx.fillRect(this.x, this.y, 20, 20);
+  ctx.drawImage(this.img,this.x,this.y,10,20);
+  //ctx.fillStyle= 'rgb(20, 20, 20)';
+  //ctx.fillRect(this.x, this.y, 20, 20);
   hpBar(this.x,this.y,this.hp,this.maxHp);
   if(update){
     if (this.y>canvas.height-20) {this.y=canvas.height-20;
@@ -637,6 +641,7 @@ var crate=function(x,y,t) {//Isn't it just CRATE?
   this.x=x;
   this.y=y;
   this.t=t;
+  this.hp=10;
   this.acceleration=0;
 };
 var supply=function(x,y,t) { 
@@ -896,8 +901,12 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
     ctx.fillRect(this.x, this.y+10, 10, 10);
     
   }
-  this.acceleration+=0.17;
-  this.y+=this.acceleration;
+  if(this.hp<=0){
+    this.x=-100;
+  }else{
+    this.acceleration+=0.17;
+    this.y+=this.acceleration;
+  }
   player1=collide(player1,this);
   npc1=collide(npc1,this);
   fly1=collide(fly1,this);
