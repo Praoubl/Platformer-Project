@@ -14,6 +14,7 @@
 //c and C:crate
 //signs and teleporters should be in the level functions
 var update=true;
+var borders=true;//bounding box
 var height=0;
 var startCoords=[{x:100,y:380},{x:100,y:380},{x:100,y:500}];
 levelStartCoords=startCoords[height];
@@ -69,7 +70,7 @@ var collide=function(a,b){
 };
 var midB=false;
 var talkT=0;
-var isColliding=function(a,b){//4365447647546437
+var isColliding=function(a,b){
   midB=false;
   if(a.x+20>b.x&&a.x<b.x+20&&a.y+20>b.y&&a.y<b.y+20){
     midB=true;
@@ -258,14 +259,14 @@ var inventoryf=function(){
   ctx.transform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
 };//^^vv<<>>xz
 var hpBar=function(x1,y1,hp1,max1){
-  ctx.fillStyle='rgb(255,0,0)';
-  if(hp1/max1>0.25&&hp1/max1<0.5){
+  ctx.fillStyle='rgb('+(255-hp1/max1*255)+','+(hp1/max1*255)+',0)';
+  /*if(hp1/max1>0.25&&hp1/max1<0.5){
     ctx.fillStyle='rgb(128,0,0)';
   }else if(hp1/max1>0.5&&hp1/max1<0.76){
     ctx.fillStyle='rgb(0,128,0)';
   }else if(hp1/max1>0.75){
     ctx.fillStyle='rgb(0,255,0)';
-  }
+  }*/
   ctx.fillRect(x1-2,y1-4,24*(hp1/max1),2);
 };
 var level=levels[height];
@@ -295,6 +296,7 @@ var player = function(x, y) {
   this.items=[];
   this.img=new Image();
   this.img.src='https://i.postimg.cc/MZ0nMHB7/IMG-1348-1.png';//'https://imgur.com/a/bVT35HX.png';
+  this.weopan="lazer";
 };
 var flyEnemy = function(x, y,t) { 
   this.x = x;
@@ -345,6 +347,7 @@ var npc = function(x, y,t,talk) {
   this.talk=talk;
   this.dialogue1=["Hello, world!"];
   this.dialogue2=[""];
+  this.intelligence=1;
 };
 var attackObj=function(x,y,d,index){
   this.x=x;
@@ -358,36 +361,38 @@ var blank=function(){
 };
 blank.prototype.display=function(){};
 attackObj.prototype.display=function(){
-  ctx.fillStyle= 'rgb(190,10,10)';
-  ctx.fillRect(this.x, this.y, 5, 5);
-  if(this.direction==="left"){
-    this.x-=7;
-  }
-  if(this.direction==="right"){
-    this.x+=7;
-  }
-  this.acceleration+=0.02;
-  this.y+=this.acceleration;
-  if(this.x<0||this.x>canvas.width||this.y>canvas.height||this.y<0){
-    blocks[this.index-1]=new blank(-20,-20,0);
-  }
-  if(isBlock[Math.floor((this.y+3)/20)][Math.floor((this.x+3)/20)]){
-    blocks[this.index-1]=new blank(-20,-20,0);
-  }
-  if(isColliding(npc1,this)){
-    npc1.hp--;
-    blocks[this.index-1]=new blank(-20,-20,0);
-    npc1.opinion--;
-  }
-  for(var i=0;i<gravityBlocks.length;i++){
-    if(isColliding(gravityBlocks[i],this)){
-      blocks[this.index-1]=new blank(-20,-20,0);
-      gravityBlocks[i].hp--;
+  if(player1.weopan==="lazer"){
+    ctx.fillStyle= 'rgb(190,10,10)';
+    ctx.fillRect(this.x, this.y, 5, 5);
+    if(this.direction==="left"){
+      this.x-=7;
     }
-  }
-  if(isColliding(fly1,this)){
-    fly1.hp--;
-    blocks[this.index-1]=new blank(-20,-20,0);
+    if(this.direction==="right"){
+      this.x+=7;
+    }
+    this.acceleration+=0.02;
+    this.y+=this.acceleration;
+    if(this.x<0||this.x>canvas.width||this.y>canvas.height||this.y<0){
+      blocks[this.index-1]=new blank(-20,-20,0);
+    }
+    if(isBlock[Math.floor((this.y+3)/20)][Math.floor((this.x+3)/20)]){
+      blocks[this.index-1]=new blank(-20,-20,0);
+    }
+    if(isColliding(npc1,this)){
+      npc1.hp--;
+      blocks[this.index-1]=new blank(-20,-20,0);
+      npc1.opinion--;
+    }
+    for(var i=0;i<gravityBlocks.length;i++){
+      if(isColliding(gravityBlocks[i],this)){
+        blocks[this.index-1]=new blank(-20,-20,0);
+        gravityBlocks[i].hp--;
+      }
+    }
+    if(isColliding(fly1,this)){
+      fly1.hp--;
+      blocks[this.index-1]=new blank(-20,-20,0);
+    }
   }
 };
 var cloudLevel2=false;
@@ -397,7 +402,7 @@ player.prototype.display = function() {
   //ctx.fillRect(this.x, this.y, 20, 20);
   hpBar(this.x,this.y,this.hp,this.maxHp);
   if(update){
-    if (this.y>canvas.height-20) {this.y=canvas.height-20;
+    if (this.y>canvas.height-20&&borders) {this.y=canvas.height-20;
       this.acceleration = 0;
       this.jumping = false; }
     if (input.up && !this.jumping) { this.acceleration = -5.4;
@@ -418,20 +423,20 @@ player.prototype.display = function() {
       reload();
       input.restart=false;
     }
-    if(this.x<0){
+    if(this.x<0&&borders){
       this.x=0;
     }
-    if(this.x>canvas.width-20){
+    if(this.x>canvas.width-20&&borders){
       this.x=canvas.width-20;
     }
-    if(this.y>canvas.height&&!cloudLevel){
+    if(this.y>canvas.height&&!cloudLevel&&borders){
       this.y=canvas.height;
-    }else if(this.y>canvas.height-21&&height>0){
+    }else if(this.y>canvas.height-21&&height>0&&borders){
       this.y=0;
       height--;
       reload(0);
     }
-    if(this.y<0){
+    if(this.y<0&&borders){
       this.y=canvas.height;
       height++;
       cloudLevel=true;
@@ -517,7 +522,9 @@ npc.prototype.display = function() {
         }
       }
     }
+    if(!this.jump){
     this.acceleration+=0.17;
+    }
     this.y+=this.acceleration;
     if(this.move){
       if (this.jump && !this.jumping) {
@@ -1212,6 +1219,7 @@ draw = function() {
     levelNum2=height;
     reload(1);
   }
+  
   if(height===0){
     ctx.clearRect(0,0,canvas.width,canvas.height);
   }else{
@@ -1234,20 +1242,21 @@ draw = function() {
   ctx.fillText(mouseX,2,50);
   ctx.fillText(mouseY,2,60);
   ctx.fillText(height,2,70);
-  npc1.display();
-  fly1.display();
-  player1.display();
   if(height===0){
     if(npc1.x<61){
       n1="right"
-    }else if(npc1.x>520){
+    }else if(npc1.x>519){
       n1="left";
     }
-    if(npc1.x>240&&npc1.x<300){
-      npc.jump=true;
+    if(npc1.x===240&&n1==="right"||npc1.x===340&&n1==="left"){
+      /*npc1.acceleration = -5.4;
+      npc1.jumping=true;*/
+      npc1.jump=true;
     }else{
       npc1.jump=false;
-    }//45642436576536
+      //bannerText("hOI!",npc1.x,npc1.y);
+    }
+    //bannerText(npc1.acceleration+"",player1.x,player1.y);
     if(n1==="right"){
       npc1.left=false;
       npc1.right=true;
@@ -1258,6 +1267,9 @@ draw = function() {
 //13:4.9 14:4.91 15:4.9 16:4.65 small fall:2.41 small bounce:3.53 
     }//hop+jump+run=19.78 (order matters)
   }//2b+2b+8b=19.99
+  npc1.display();
+  fly1.display();
+  player1.display();
   interact=false;
   talkT--;
   if(talkT<=0){
@@ -1266,6 +1278,7 @@ draw = function() {
   }else{
     talkT--;
   }
+  //bannerText(npc1.acceleration+"",player1.x,player1.y-20);
   //reload();
   //height=0;
   talkT2++;
