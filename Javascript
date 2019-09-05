@@ -1,5 +1,11 @@
-//wasd and arrows
-//shift to attack
+//wasd and arrows: move
+//shift: attack
+//x: interact
+//e: open inventory
+//z: exit menu
+//c: advance dialogue
+//q: restart
+
 //1:stone
 //2:cloud
 //g:goal
@@ -245,14 +251,14 @@ var boxRect=function(x,y,w,h){
 var midNums=[];
 var inventoryf=function(){
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  midNums[0]=Math.floor((canvas.width-20)/(3*80));
+  midNums[1]=Math.floor((canvas.height-20)/(3*80));
   ctx.fillStyle='rgba(50,50,50,0.3)';
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  boxRect(canvas.width/6,canvas.height/6,2*canvas.width/3,2*canvas.height/3);
+  boxRect(canvas.width/6,canvas.height/6,2*canvas.width/3,20+2*80*midNums[1]);
   ctx.fillStyle= 'rgb(0, 0, 0)';
   ctx.font = '15px sans-serif';
   ctx.fillText("press z to exit",canvas.width-93,12);
-  midNums[0]=Math.floor((canvas.width-20)/(3*80));
-  midNums[1]=Math.floor((canvas.height-20)/(3*80));
   for(i=0;i<player1.capacity;i++){
     boxRect(canvas.width/6+80*(i%midNums[0])+20,canvas.height/6+80*Math.floor(i/midNums[0])+20,60,60);
   }
@@ -272,11 +278,13 @@ var hpBar=function(x1,y1,hp1,max1){
 var level=levels[height];
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
-var item=function(x,y,t,isEntity,s){
+var item=function(x,y,t,isEntity,s,index){
   this.x=x;
   this.y=y;
+  this.t=t;
   this.isEntity=isEntity;
   this.s=s;
+  this.index=index;
 };
 var player = function(x, y) { 
   this.x = x;
@@ -299,11 +307,12 @@ var player = function(x, y) {
     reload();
   };
   this.sightDistance=200;
-  this.items=[];
+  this.items=["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"];
   this.capacity=16;
   this.img=new Image();
   this.img.src='https://i.postimg.cc/MZ0nMHB7/IMG-1348-1.png';//'https://imgur.com/a/bVT35HX.png';
   this.weopan="lazer";
+  this.inventoryPick="";
 };
 var flyEnemy = function(x, y,t) { 
   this.x = x;
@@ -363,13 +372,17 @@ var attackObj=function(x,y,d,index){
   this.index=index;
   this.acceleration=0;
 };
-var blank=function(){
+var blank=function(x,y){
+  this.x=x;
+  this.y=y;
   this.is=true;
 };
 item.prototype.display=function(){
-  if(isColliding(player1,this)&&this.isEntity&&player1.items.length<player1.capacity){
+  if(isColliding(player1,this)&&this.isEntity&&player1.numItems<player1.capacity){
     player1.items.push(this.t);
+    blocks[this.index-1]=new blank(-20,-20,0);
   }
+  bannerText(this.t,this.x,this.y);
 };
 blank.prototype.display=function(){};
 attackObj.prototype.display=function(){
@@ -410,8 +423,15 @@ attackObj.prototype.display=function(){
 var cloudLevel2=false;
 player.prototype.display = function() { 
   ctx.drawImage(this.img,this.x,this.y,10,20);
+  //bannerText(""+player1.items.length,this.x,this.y);
   //ctx.fillStyle= 'rgb(20, 20, 20)';
   //ctx.fillRect(this.x, this.y, 20, 20);
+  this.numItems=0;
+  for(i=0;i<this.capacity;i++){
+    if(this.items[i]!==""){
+      this.numItems++;
+    }
+  }
   hpBar(this.x,this.y,this.hp,this.maxHp);
   if(update){
     if (this.y>canvas.height-20&&borders) {this.y=canvas.height-20;
@@ -651,6 +671,7 @@ flyEnemy.prototype.display = function() {
 var player1=new player(0, 380);
 var fly1=new flyEnemy(600, 80);
 var npc1=new npc(200,380,0);
+var blank1=new blank(0,0);
 var block=function(x,y,t) { 
   this.x=x;
   this.y=y;
@@ -721,14 +742,16 @@ lava.prototype.display = function() {
     ctx.fillRect(this.x+10, this.y, 10, 10);
     ctx.fillRect(this.x, this.y+10, 10, 10);
   }
-  if(isColliding(player1,this)) { 
-    player1.respawn(startCoords[height].x,startCoords[height].y); 
-  }
-  if(isColliding(npc1,this)) { 
-    npc1.hp=0;
-  }
-  if(isColliding(fly1,this)) { 
-    fly1.hp=0;
+  if(update){
+    if(isColliding(player1,this)) { 
+      player1.respawn(startCoords[height].x,startCoords[height].y); 
+    }
+    if(isColliding(npc1,this)) { 
+      npc1.hp=0;
+    }
+    if(isColliding(fly1,this)) { 
+      fly1.hp=0;
+    }
   }
 };
 spike.prototype.display = function() { 
@@ -900,6 +923,7 @@ teleporter.prototype.display = function() {
     npc1.y=this.yt;
   }
 };
+var is;
 crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
   if(this.t===0){//different textures
     ctx.fillStyle='rgb(100, 50, 0)';
@@ -938,12 +962,28 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
   }
   if(player1.y>this.y-19&&player1.y<this.y+20&&player1.x+22>this.x&&player1.x<this.x+22&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)-0])===false&&update){
     if(player1.x<this.x+10&&(isBlock[Math.floor(this.y/20)][Math.floor(this.x/20)-2])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)-2])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)-1])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)+1])===false){
-      if(input.x){
+      blank1.x=this.x-43;
+      blank1.y=this.y;
+      is=true;
+      for(i=0;i<gravityBlocks.length;i++){
+        if(isColliding(blank1,gravityBlocks[i])){
+          is=false;
+        }
+      }
+      if(input.x&&is){
         this.x-=43;
       }
       bannerText("press x",this.x,this.y);
     }else if((isBlock[Math.floor(this.y/20)][Math.floor(this.x/20)+3])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)+3])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)+2])===false&&(isBlock[Math.floor(this.y/20)-1][Math.floor(this.x/20)+1])===false&&player1.x>this.x+10){
-      if(input.x){
+      blank1.x=this.x+43;
+      blank1.y=this.y;
+      is=true;
+      for(i=0;i<gravityBlocks.length;i++){
+        if(isColliding(blank1,gravityBlocks[i])){
+          is=false;
+        }
+      }
+      if(input.x&&is){
         this.x+=43;
       }
       bannerText("press x",this.x,this.y);
@@ -1106,11 +1146,17 @@ block.prototype.display = function() {
 //var npc4=new npc(-20,380,0);
 var mouseX;
 var mouseY;
+var mouseIsClicked=false;
 function mouseMoveHandler(e) {
   mouseX = e.clientX - canvas.offsetLeft;
   mouseY = e.clientY - canvas.offsetTop;
-}
+};
+function mouseClickHandler(e) {
+  mouseIsClicked=true;
+  //alert('click');
+};
 document.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("click", mouseClickHandler, false);
 /*=======================================================================*/
 var levelFunctions=[
 function(a){//level specific functions to be run on reload
@@ -1122,6 +1168,7 @@ function(a){//level specific functions to be run on reload
     npc1.move=true;
     fly1.move=true;
   }
+  blocks.push(new item(200,200,"5",true,20,blocks.length+1));
   blocks.push(new sign(60,380,0,"test"));
   blocks.push(new teleporter(280,60,0,300,140));
   blocks.push(new teleporter(280,140,0,300,60));
@@ -1231,7 +1278,6 @@ draw = function() {
     levelNum2=height;
     reload(1);
   }
-  
   if(height===0){
     ctx.clearRect(0,0,canvas.width,canvas.height);
   }else{
@@ -1290,6 +1336,31 @@ draw = function() {
   }else{
     talkT--;
   }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  midNums[0]=Math.floor((canvas.width-20)/(3*80));
+  midNums[1]=Math.floor((canvas.height-20)/(3*80));
+  if(player1.inventory===true&&mouseIsClicked/*&&mouseX>canvas.width/6+10&&mouseX<canvas.width/6+80*(midNums[0])+110&&mouseY>canvas.height/6+10&&mouseY<canvas.height/6+10+2*80*midNums[1]*/){
+    //player1.inventoryPick=player1.items[(mouseX-canvas.width/6-10)/80+midNums[0]*(mouseY-canvas.height/6-10)/80];
+    ctx.fillStyle='rgb(250,50,50)';
+    ctx.fillRect(0,0,100,100);
+  }
+  if(player1.inventory){
+    ctx.fillStyle= 'rgb(0, 0, 0)';
+    ctx.fillText(player1.inventoryPick+"",mouseX,MouseY-15);
+    ctx.font = '15px sans-serif';
+  }
+  ctx.setTransform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
+  /*midNums[0]=Math.floor((canvas.width-20)/(3*80));
+  midNums[1]=Math.floor((canvas.height-20)/(3*80));
+  ctx.fillStyle='rgba(50,50,50,0.3)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  boxRect(canvas.width/6,canvas.height/6,2*canvas.width/3,20+2*80*midNums[1]);
+  ctx.fillStyle= 'rgb(0, 0, 0)';
+  ctx.font = '15px sans-serif';
+  ctx.fillText("press z to exit",canvas.width-93,12);
+  for(i=0;i<player1.capacity;i++){
+    boxRect(canvas.width/6+80*(i%midNums[0])+20,canvas.height/6+80*Math.floor(i/midNums[0])+20,60,60);
+  }*/
   //bannerText(npc1.acceleration+"",player1.x,player1.y-20);
   //reload();
   //height=0;
@@ -1297,8 +1368,8 @@ draw = function() {
   timer++;
   //ctx.translate(-player1.x,-player1.y);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  mouseIsClicked=false;
   window.requestAnimationFrame(draw);
 };
 
 window.requestAnimationFrame(draw);
-
