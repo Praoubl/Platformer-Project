@@ -241,10 +241,11 @@ function release(evt) {
     case KEY.E: input.e = false; break;
   }
 }
-var boxRect=function(x,y,w,h){
+var boxRect=function(x,y,w,h,l){
   ctx.strokeStyle='rgb(250,250,250)';
   ctx.fillStyle='rgb(20,20,20)';
   ctx.lineWidth=4;
+  ctx.lineWidth=l;
   ctx.fillRect(x,y,w,h);
   ctx.strokeRect(x,y,w,h);
 };
@@ -255,7 +256,7 @@ var inventoryf=function(){
   midNums[1]=Math.floor((canvas.height-20)/(3*80));
   ctx.fillStyle='rgba(50,50,50,0.3)';
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  boxRect(canvas.width/6,canvas.height/6,2*canvas.width/3,20+2*80*midNums[1]);
+  boxRect(canvas.width/6,canvas.height/6-7,2*canvas.width/3,20+2*80*midNums[1]+7);
   ctx.fillStyle= 'rgb(0, 0, 0)';
   ctx.font = '15px sans-serif';
   ctx.fillText("press z to exit",canvas.width-93,12);
@@ -451,10 +452,6 @@ player.prototype.display = function() {
     }
     this.acceleration+=0.17;
     this.y+=this.acceleration;
-    if(input.restart){
-      reload();
-      input.restart=false;
-    }
     if(this.x<0&&borders){
       this.x=0;
     }
@@ -483,18 +480,22 @@ player.prototype.display = function() {
       kc=0;
     }
   }
+  if(input.restart){
+    reload();
+    input.restart=false;
+  }
   if(input.e){
     this.inventory=true;
     update=false;
     reload(0);
   }
   if(this.inventory){
-    inventoryf();
     if(input.z){
       update=true;
+      this.inventory=false;
       reload(0);
-      this.inventory=false
     }
+    inventoryf();
   }
   if(this.hp<=0){
     this.respawn(startCoords[height].x,startCoords[height].y);
@@ -1329,6 +1330,10 @@ draw = function() {
   fly1.display();
   player1.display();
   interact=false;
+  if(input.z){
+    ctx.fillStyle='rgb(255,0,0)';
+    ctx.fillRect(player1.x,player1.y,20,20);
+  }
   talkT--;
   if(talkT<=0){
     talkNum2=talkNum;
@@ -1339,15 +1344,24 @@ draw = function() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   midNums[0]=Math.floor((canvas.width-20)/(3*80));
   midNums[1]=Math.floor((canvas.height-20)/(3*80));
-  if(player1.inventory===true&&mouseIsClicked/*&&mouseX>canvas.width/6+10&&mouseX<canvas.width/6+80*(midNums[0])+110&&mouseY>canvas.height/6+10&&mouseY<canvas.height/6+10+2*80*midNums[1]*/){
-    //player1.inventoryPick=player1.items[(mouseX-canvas.width/6-10)/80+midNums[0]*(mouseY-canvas.height/6-10)/80];
-    ctx.fillStyle='rgb(250,50,50)';
-    ctx.fillRect(0,0,100,100);
+  if(player1.inventory===true&&mouseX>canvas.width/6+10&&mouseX<canvas.width/6+80*(midNums[0])+10&&mouseY>canvas.height/6+10&&mouseY<canvas.height/6+10+2*80*midNums[1]){
+    boxRect(canvas.width/6+20,canvas.height/6-1,midNums[0]*80-20,15);
+    ctx.fillStyle= 'rgb(250, 250, 250)';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(player1.items[Math.floor(((mouseX-canvas.width/6)-10)/80)+midNums[0]*Math.floor(((mouseY-canvas.height/6-10)/80))],canvas.width/6+24,canvas.height/6+10);
+    if(mouseIsClicked){
+      midNums[2]=player1.inventoryPick;
+      player1.inventoryPick=player1.items[Math.floor(((mouseX-canvas.width/6)-10)/80)+midNums[0]*Math.floor((mouseY-canvas.height/6-10)/80)];
+      //ctx.fillStyle='rgb(250,50,50)';
+      //ctx.fillRect(0,0,100,100);
+      player1.items[Math.floor(((mouseX-canvas.width/6)-10)/80)+midNums[0]*Math.floor((mouseY-canvas.height/6-10)/80)]=midNums[2];
+    }
   }
-  if(player1.inventory){
-    ctx.fillStyle= 'rgb(0, 0, 0)';
-    ctx.fillText(player1.inventoryPick+"",mouseX,MouseY-15);
-    ctx.font = '15px sans-serif';
+  if(player1.inventory&&player1.inventoryPick.length>0){
+    boxRect(mouseX-3,mouseY-13,player1.inventoryPick.length*7+4,14,2);
+    ctx.fillStyle= 'rgb(250, 250, 250)';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(player1.inventoryPick,mouseX,mouseY-2);
   }
   ctx.setTransform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
   /*midNums[0]=Math.floor((canvas.width-20)/(3*80));
@@ -1364,6 +1378,10 @@ draw = function() {
   //bannerText(npc1.acceleration+"",player1.x,player1.y-20);
   //reload();
   //height=0;
+  if(input.x){
+    //ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //ctx.fillRect(100,100,100,100);
+  }
   talkT2++;
   timer++;
   //ctx.translate(-player1.x,-player1.y);
