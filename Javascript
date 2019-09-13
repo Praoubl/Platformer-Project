@@ -250,6 +250,11 @@ var boxRect=function(x,y,w,h,l){
   ctx.strokeRect(x,y,w,h);
 };
 var midNums=[];
+var displayItem=function(x,y,t,s){//TODO
+  ctx.fillStyle='rgb(250,250,250)';
+  ctx.font = '15px sans-serif';
+  ctx.fillText(t,x,y+11);
+};
 var inventoryf=function(){
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   midNums[0]=Math.floor((canvas.width-20)/(3*80));
@@ -262,6 +267,7 @@ var inventoryf=function(){
   ctx.fillText("press z to exit",canvas.width-93,12);
   for(i=0;i<player1.capacity;i++){
     boxRect(canvas.width/6+80*(i%midNums[0])+20,canvas.height/6+80*Math.floor(i/midNums[0])+20,60,60);
+    displayItem(canvas.width/6+80*(i%midNums[0])+25,canvas.height/6+80*Math.floor(i/midNums[0])+25,player1.items[i],50);
   }
   ctx.transform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
 };//^^vv<<>>xz
@@ -279,13 +285,14 @@ var hpBar=function(x1,y1,hp1,max1){
 var level=levels[height];
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
-var item=function(x,y,t,isEntity,s,index){
+var item=function(x,y,t,isEntity,s,index,id){
   this.x=x;
   this.y=y;
   this.t=t;
   this.isEntity=isEntity;
   this.s=s;
   this.index=index;
+  this.id=id;
 };
 var player = function(x, y) { 
   this.x = x;
@@ -380,10 +387,20 @@ var blank=function(x,y){
 };
 item.prototype.display=function(){
   if(isColliding(player1,this)&&this.isEntity&&player1.numItems<player1.capacity){
-    player1.items.push(this.t);
+    //player1.items.push(this.t);
+    for(i=0;i<player1.capacity;i++){
+      if(player1.items[i]===""/*||player1.items[i]===Null*/){
+        player1.items[i]=this.t;
+        i=player1.capacity+1;
+      }
+    }
+    items.t[this.id]="";
+    items.x[this.id]=0;
+    items.y[this.id]=0;
     blocks[this.index-1]=new blank(-20,-20,0);
   }
-  bannerText(this.t,this.x,this.y);
+  //bannerText(this.t,this.x,this.y);
+  displayItem(this.x,this.y,this.t,this.s);
 };
 blank.prototype.display=function(){};
 attackObj.prototype.display=function(){
@@ -1158,18 +1175,29 @@ function mouseClickHandler(e) {
 };
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", mouseClickHandler, false);
+items={
+  t:["5"],
+  x:[200],
+  y:[200],
+  s:[20]
+};
 /*=======================================================================*/
 var levelFunctions=[
 function(a){//level specific functions to be run on reload
-  if(isNaN(a)){
+  if(isNaN(a)){//only on first load
     npc1.y=320;
     npc1.x=60;
     fly1.x=400;
     fly1.y=100;
     npc1.move=true;
     fly1.move=true;
+    items={
+      t:["5"],
+      x:[200], 
+      y:[200],
+      s:[20]
+    };
   }
-  blocks.push(new item(200,200,"5",true,20,blocks.length+1));
   blocks.push(new sign(60,380,0,"test"));
   blocks.push(new teleporter(280,60,0,300,140));
   blocks.push(new teleporter(280,140,0,300,60));
@@ -1249,9 +1277,9 @@ var reload=function(a){
   //blocks.push(npc4);
   midb=true;
   kc=0;
-  levelFunctions[height](a);
   //levelFunctions[0];
   if(isNaN(a)){
+    items={t:[],x:[],y:[],s:[]};
     player1.x=levelStartCoords.x;
     player1.y=levelStartCoords.y;
     player1.acceleration = 0;
@@ -1262,6 +1290,12 @@ var reload=function(a){
     npc1.opinion=1;
     fly1.move=true;
     fly1.hp=10;
+  }
+  levelFunctions[height](a);
+  for(i=0;i<items.t.length;i++){
+    if(items.t[i]!==""){
+      blocks.push(new item(items.x[i],items.y[i],items.t[i],true,items.s[i],blocks.length+1,i));
+    }
   }
 }
 reload();
