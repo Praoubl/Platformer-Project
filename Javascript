@@ -319,7 +319,7 @@ var player = function(x, y) {
   this.capacity=16;
   this.img=new Image();
   this.img.src='https://i.postimg.cc/MZ0nMHB7/IMG-1348-1.png';//'https://imgur.com/a/bVT35HX.png';
-  this.weopan="lazer";
+  this.weopan="laser";
   this.inventoryPick="";
 };
 var flyEnemy = function(x, y,t) { 
@@ -461,7 +461,7 @@ player.prototype.display = function() {
     if (input.right) { this.x += 3; this.direction="right";}
     if(input.attack){
       this.attacking=true;
-      if(this.ammo>0&&timer%5===0){
+      if(this.ammo>0&&timer%5===0&&this.weopan==="laser"){
         blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
         this.ammo--;
       }
@@ -508,6 +508,13 @@ player.prototype.display = function() {
   }
   if(this.inventory){
     if(input.z){
+      if(this.inventoryPick!==""){
+        items.x.push(this.x);
+        items.y.push(this.y);
+        items.t.push(this.inventoryPick);
+        items.s.push(20);
+        this.inventoryPick="";
+      }
       update=true;
       this.inventory=false;
       reload(0);
@@ -1014,8 +1021,15 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
       this.x--;
     }
   }
+  var blank2=new blank();
   for (var i = 0;i < gravityBlocks.length; i++) {
-    gravityBlocks[i]=collide(gravityBlocks[i],this);
+    if(isColliding(gravityBlocks[i],this)){
+      blank2=this;
+      this.x=collide(this,gravityBlocks[i]).x;
+      this.y=collide(this,gravityBlocks[i]).y;
+      gravityBlocks[i]=collide(gravityBlocks[i],blank1);
+    }
+    //gravityBlocks[i]=collide(gravityBlocks[i],this);
   }
 };
 wall.prototype.display = function() { 
@@ -1214,7 +1228,9 @@ function(a){//level specific functions to be run on reload
 var reload=function(a){
   blocks = [];
   extraBlocks=[];
-  gravityBlocks=[];
+  if(isNaN(a)){
+    gravityBlocks=[];
+  }
   for (var y = 0;y < level.length; y++) {
     for (var x = 0;x < level[y].length; x++) {
       isBlock[y][x]=false;
@@ -1253,10 +1269,14 @@ var reload=function(a){
         blocks.push(new supply(x*20,y*20,0));
       }else if(level[y][x]==="c"){
         blocks.push(new wall(x*20,y*20,2));
-        gravityBlocks.push(new crate(x*20,y*20,0));
+        if(isNaN(a)){
+          gravityBlocks.push(new crate(x*20,y*20,0));
+        }
       }else if(level[y][x]==="C"){
         blocks.push(new wall(x*20,y*20,3));
-        gravityBlocks.push(new crate(x*20,y*20,0));
+        if(isNaN(a)){
+          gravityBlocks.push(new crate(x*20,y*20,0));
+        }
       }else if(level[y][x]==="A"){
         blocks.push(new wall(x*20,y*20,2));
         extraBlocks.push(new spike(x*20,y*20,0));
@@ -1389,6 +1409,18 @@ draw = function() {
       //ctx.fillStyle='rgb(250,50,50)';
       //ctx.fillRect(0,0,100,100);
       player1.items[Math.floor(((mouseX-canvas.width/6)-10)/80)+midNums[0]*Math.floor((mouseY-canvas.height/6-10)/80)]=midNums[2];
+    }
+  }
+  if(player1.inventory&&!(mouseX>canvas.width/6+10)||player1.inventory&&!(mouseX<5*canvas.width/6)||player1.inventory&&!(mouseY>canvas.height/6-7)||player1.inventory&&!(mouseY<canvas.height/6+20+2*80*midNums[1])){
+    //ctx.fillRect(0,0,100,100);
+    if(mouseIsClicked){
+      if(player1.inventoryPick!==""){
+        items.x.push(player1.x);
+        items.y.push(player1.y);
+        items.t.push(player1.inventoryPick);
+        items.s.push(20);
+        player1.inventoryPick="";
+      }
     }
   }
   if(player1.inventory&&player1.inventoryPick.length>0){
