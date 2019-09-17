@@ -269,6 +269,8 @@ var inventoryf=function(){
     boxRect(canvas.width/6+80*(i%midNums[0])+20,canvas.height/6+80*Math.floor(i/midNums[0])+20,60,60);
     displayItem(canvas.width/6+80*(i%midNums[0])+25,canvas.height/6+80*Math.floor(i/midNums[0])+25,player1.items[i],50);
   }
+  boxRect(canvas.width/2+20,canvas.height/6+20,60,60);
+  displayItem(canvas.width/2+25,canvas.height/6+25,player1.weopan,50);
   ctx.transform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
 };//^^vv<<>>xz
 var hpBar=function(x1,y1,hp1,max1){
@@ -319,7 +321,7 @@ var player = function(x, y) {
   this.capacity=16;
   this.img=new Image();
   this.img.src='https://i.postimg.cc/MZ0nMHB7/IMG-1348-1.png';//'https://imgur.com/a/bVT35HX.png';
-  this.weopan="laser";
+  this.weopan="lazer";
   this.inventoryPick="";
 };
 var flyEnemy = function(x, y,t) { 
@@ -461,7 +463,7 @@ player.prototype.display = function() {
     if (input.right) { this.x += 3; this.direction="right";}
     if(input.attack){
       this.attacking=true;
-      if(this.ammo>0&&timer%5===0&&this.weopan==="laser"){
+      if(this.ammo>0&&timer%5===0&&this.weopan==="lazer"){
         blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
         this.ammo--;
       }
@@ -970,7 +972,7 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
     
   }
   if(this.hp<=0){
-    this.x=-100;
+    this.x=-1000;
   }else{
     this.acceleration+=0.17;
     this.y+=this.acceleration;
@@ -1428,6 +1430,19 @@ draw = function() {
     ctx.fillStyle= 'rgb(250, 250, 250)';
     ctx.font = '11px sans-serif';
     ctx.fillText(player1.inventoryPick,mouseX,mouseY-2);
+  }
+  if(player1.inventory&&mouseX>canvas.width/2+10&&mouseY>canvas.height/6+10&&mouseX<canvas.width/2+90&&mouseY<canvas.height/6+90){
+    boxRect(canvas.width/6+20,canvas.height/6-1,midNums[0]*80-20,15);
+    ctx.fillStyle= 'rgb(250, 250, 250)';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(player1.weopan,canvas.width/6+24,canvas.height/6+10);
+    if(mouseIsClicked){
+      midNums[2]=player1.inventoryPick;
+      player1.inventoryPick=player1.weopan;
+      //ctx.fillStyle='rgb(250,50,50)';
+      //ctx.fillRect(0,0,100,100);
+      player1.weopan=midNums[2];
+    }
   }
   ctx.setTransform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
   /*midNums[0]=Math.floor((canvas.width-20)/(3*80));
