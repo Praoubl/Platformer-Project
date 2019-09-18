@@ -26,7 +26,7 @@ var startCoords=[{x:100,y:380},{x:100,y:380},{x:100,y:500}];
 levelStartCoords=startCoords[height];
 var cloudLevel=false;
 var blocks = [];
-var levels =[[" 34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+var levels =[[" 3434343.,.343434343.,.3434343",
               " 34,.,.,.,.,.,.,.,.,.,.,.,.,43",
               " 34,.,.,.,.,.,.,.,.,.,.,.,.,43",
               " 34s.,.,.,.,.,.,.,.,.,.,.,.,43",
@@ -50,7 +50,8 @@ var levels =[[" 34,.,.,.,.,.,.,.,.,.,.,.,.,43",
 ],[""]];
 var cloudLevels=[[],[],[]];
 var extraBlocks=[];
-var gravityBlocks=[];
+var gravityBlocks=[[],[],[],[],[],[],[],[],[],[],[]];
+var levelEntities=[{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}}];
 var timer=0;
 var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
 var isHazard=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
@@ -396,9 +397,9 @@ item.prototype.display=function(){
         i=player1.capacity+1;
       }
     }
-    items.t[this.id]="";
-    items.x[this.id]=0;
-    items.y[this.id]=0;
+    items[height].t[this.id]="";
+    items[height].x[this.id]=0;
+    items[height].y[this.id]=0;
     blocks[this.index-1]=new blank(-20,-20,0);
   }
   //bannerText(this.t,this.x,this.y);
@@ -428,10 +429,10 @@ attackObj.prototype.display=function(){
       blocks[this.index-1]=new blank(-20,-20,0);
       npc1.opinion--;
     }
-    for(var i=0;i<gravityBlocks.length;i++){
-      if(isColliding(gravityBlocks[i],this)){
+    for(var i=0;i<gravityBlocks[height].length;i++){
+      if(isColliding(gravityBlocks[height][i],this)){
         blocks[this.index-1]=new blank(-20,-20,0);
-        gravityBlocks[i].hp--;
+        gravityBlocks[height][i].hp--;
       }
     }
     if(isColliding(fly1,this)){
@@ -482,13 +483,13 @@ player.prototype.display = function() {
     }else if(this.y>canvas.height-21&&height>0&&borders){
       this.y=0;
       height--;
-      reload(0);
+      //reload(0);
     }
     if(this.y<0&&borders){
       this.y=canvas.height;
       height++;
       cloudLevel=true;
-      reload(0);
+      //reload(0);
     }
     if(this.attacking=true){
 
@@ -511,10 +512,10 @@ player.prototype.display = function() {
   if(this.inventory){
     if(input.z){
       if(this.inventoryPick!==""){
-        items.x.push(this.x);
-        items.y.push(this.y);
-        items.t.push(this.inventoryPick);
-        items.s.push(20);
+        items[height].x.push(this.x);
+        items[height].y.push(this.y);
+        items[height].t.push(this.inventoryPick);
+        items[height].s.push(20);
         this.inventoryPick="";
       }
       update=true;
@@ -893,6 +894,11 @@ trampoline.prototype.display = function() {
       fly1.acceleration =Math.abs(fly1.acceleration)*-1.025;
       fly1.jumping = true; 
     }
+    for(i=0;i<gravityBlocks[level].length;i++){
+      if(isColliding(gravityBlocks[level][i],this)) {
+        gravityBlocks[level][i].acceleration =Math.abs(gravityBlocks[level][i].acceleration)*-1.025;
+      }
+    }
   }
 };
 supply.prototype.display = function() { 
@@ -992,8 +998,8 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
       blank1.x=this.x-43;
       blank1.y=this.y;
       is=true;
-      for(i=0;i<gravityBlocks.length;i++){
-        if(isColliding(blank1,gravityBlocks[i])){
+      for(i=0;i<gravityBlocks[height].length;i++){
+        if(isColliding(blank1,gravityBlocks[height][i])){
           is=false;
         }
       }
@@ -1005,8 +1011,8 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
       blank1.x=this.x+43;
       blank1.y=this.y;
       is=true;
-      for(i=0;i<gravityBlocks.length;i++){
-        if(isColliding(blank1,gravityBlocks[i])){
+      for(i=0;i<gravityBlocks[height].length;i++){
+        if(isColliding(blank1,gravityBlocks[height][i])){
           is=false;
         }
       }
@@ -1024,12 +1030,12 @@ crate.prototype.display = function() {//CRATE, just CRATE, isn't it?
     }
   }
   var blank2=new blank();
-  for (var i = 0;i < gravityBlocks.length; i++) {
-    if(isColliding(gravityBlocks[i],this)){
+  for (var i = 0;i < gravityBlocks[height].length; i++) {
+    if(isColliding(gravityBlocks[height][i],this)){
       blank2=this;
-      this.x=collide(this,gravityBlocks[i]).x;
-      this.y=collide(this,gravityBlocks[i]).y;
-      gravityBlocks[i]=collide(gravityBlocks[i],blank1);
+      this.x=collide(this,gravityBlocks[height][i]).x;
+      this.y=collide(this,gravityBlocks[height][i]).y;
+      gravityBlocks[height][i]=collide(gravityBlocks[height][i],blank1);
     }
     //gravityBlocks[i]=collide(gravityBlocks[i],this);
   }
@@ -1168,8 +1174,8 @@ block.prototype.display = function() {
   player1=collide(player1,this);
   npc1=collide(npc1,this);
   fly1=collide(fly1,this);
-  for (var i = 0;i < gravityBlocks.length; i++) {
-    gravityBlocks[i]=collide(gravityBlocks[i],this);
+  for (var i = 0;i < gravityBlocks[height].length; i++) {
+    gravityBlocks[height][i]=collide(gravityBlocks[height][i],this);
   }
   //npc2=collide(npc2,this);
   //npc3=collide(npc3,this);
@@ -1191,13 +1197,18 @@ function mouseClickHandler(e) {
 };
 document.addEventListener("mousemove", mouseMoveHandler, false);
 document.addEventListener("click", mouseClickHandler, false);
-items={
+items=[{
   t:["5"],
   x:[200],
   y:[200],
   s:[20]
-};
-/*=======================================================================*/
+},{
+  t:["5"],
+  x:[200],
+  y:[200],
+  s:[20]
+}];
+/*[=======================================================================]*/
 var levelFunctions=[
 function(a){//level specific functions to be run on reload
   if(isNaN(a)){//only on first load
@@ -1207,12 +1218,17 @@ function(a){//level specific functions to be run on reload
     fly1.y=100;
     npc1.move=true;
     fly1.move=true;
-    items={
+    items=[{
       t:["5"],
-      x:[200], 
+      x:[200],
       y:[200],
       s:[20]
-    };
+    },{
+      t:["5"],
+      x:[200],
+      y:[200],
+      s:[20]
+    }];
   }
   blocks.push(new sign(60,380,0,"test"));
   blocks.push(new teleporter(280,60,0,300,140));
@@ -1231,7 +1247,7 @@ var reload=function(a){
   blocks = [];
   extraBlocks=[];
   if(isNaN(a)){
-    gravityBlocks=[];
+    gravityBlocks[height]=[];
   }
   for (var y = 0;y < level.length; y++) {
     for (var x = 0;x < level[y].length; x++) {
@@ -1272,12 +1288,12 @@ var reload=function(a){
       }else if(level[y][x]==="c"){
         blocks.push(new wall(x*20,y*20,2));
         if(isNaN(a)){
-          gravityBlocks.push(new crate(x*20,y*20,0));
+          gravityBlocks[height].push(new crate(x*20,y*20,0));
         }
       }else if(level[y][x]==="C"){
         blocks.push(new wall(x*20,y*20,3));
         if(isNaN(a)){
-          gravityBlocks.push(new crate(x*20,y*20,0));
+          gravityBlocks[height].push(new crate(x*20,y*20,0));
         }
       }else if(level[y][x]==="A"){
         blocks.push(new wall(x*20,y*20,2));
@@ -1301,7 +1317,7 @@ var reload=function(a){
   kc=0;
   //levelFunctions[0];
   if(isNaN(a)){
-    items={t:[],x:[],y:[],s:[]};
+    items=[{t:[],x:[],y:[],s:[]}],[{t:[],x:[],y:[],s:[]}],[{t:[],x:[],y:[],s:[]}],[{t:[],x:[],y:[],s:[]}];
     player1.x=levelStartCoords.x;
     player1.y=levelStartCoords.y;
     player1.acceleration = 0;
@@ -1314,14 +1330,15 @@ var reload=function(a){
     fly1.hp=10;
   }
   levelFunctions[height](a);
-  for(i=0;i<items.t.length;i++){
-    if(items.t[i]!==""){
-      blocks.push(new item(items.x[i],items.y[i],items.t[i],true,items.s[i],blocks.length+1,i));
+  for(i=0;i<items[height].t.length;i++){
+    if(items[height].t[i]!==""){
+      blocks.push(new item(items[height].x[i],items[height].y[i],items[height].t[i],true,items[height].s[i],blocks.length+1,i));
     }
   }
 }
 reload();
 var levelNum2=height;
+var loaded=[true,true,false];
 draw = function() { 
   //ctx.translate(player1.x,player1.y);
   var canvas = document.getElementById('canvas');
@@ -1329,11 +1346,23 @@ draw = function() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.transform(2,0,0,2,canvas.width/2-player1.x*2,canvas.height/2-player1.y*2);
   if(height!==levelNum2){
+    levelEntities[levelNum2].npc1=npc1;
+    levelEntities[levelNum2].fly1=fly1;
     level=levels[height];
     levelStartCoords.x=startCoords[height].x;
     levelStartCoords.y=startCoords[height].y;
     levelNum2=height;
-    reload(1);
+    if(loaded[height]){
+      reload(1);
+    }else{
+      reload();
+      loaded[height]=true;
+    }
+    if(!isNaN(levelEntities[height].npc1.y)){
+      bannerText("qwertyuiop",player1.x,player1.y);
+      npc1=levelEntities[height].npc1;
+      fly1=levelEntities[height].fly1;
+    }
   }
   if(height===0){
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1346,8 +1375,8 @@ draw = function() {
   for (var i = 0;i < extraBlocks.length; i++) {
     extraBlocks[i].display();
   }
-  for (var i = 0;i < gravityBlocks.length; i++) {
-    gravityBlocks[i].display();//yjod yslrd qasvr sgyrt yjr zryrptd gtpz s drddopm om yjr drbrmyj shr
+  for (var i = 0;i < gravityBlocks[height].length; i++) {
+    gravityBlocks[height][i].display();//yjod yslrd qasvr sgyrt yjr zryrptd gtpz s drddopm om yjr drbrmyj shr
   }
   ctx.font = '10px sans-serif';//11b+11b+11b+3b=19.61
   ctx.fillText(input.restart,2,10);//3b+3b+3b+11b=19.99
@@ -1417,10 +1446,10 @@ draw = function() {
     //ctx.fillRect(0,0,100,100);
     if(mouseIsClicked){
       if(player1.inventoryPick!==""){
-        items.x.push(player1.x);
-        items.y.push(player1.y);
-        items.t.push(player1.inventoryPick);
-        items.s.push(20);
+        items[height].x.push(player1.x);
+        items[height].y.push(player1.y);
+        items[height].t.push(player1.inventoryPick);
+        items[height].s.push(20);
         player1.inventoryPick="";
       }
     }
