@@ -1,6 +1,5 @@
-//Platformer
-
 //wasd and arrows: move
+//mouse: aim
 //shift: attack
 //x: interact
 //e: open inventory
@@ -82,8 +81,8 @@ var extraBlocks=[];
 var gravityBlocks=[[],[],[],[],[],[],[],[],[],[],[]];
 var levelEntities=[{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}},{npc1:{x:0},fly1:{x:0}}];
 var timer=0;
-var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
-var isHazard=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+var isBlock=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+var isHazard=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
 var midO;
 var collide=function(a,b){
   midO=a;
@@ -406,10 +405,12 @@ var npc = function(x, y,t,talk) {
   this.dialogue2=[""];
   this.intelligence=1;
 };
-var attackObj=function(x,y,d,index){
+var attackObj=function(x,y,dx,dy,speed,index){
   this.x=x;
   this.y=y;
-  this.direction=d;
+  this.dx=dx;
+  this.dy=dy;
+  this.speed=speed;
   this.index=index;
   this.acceleration=0;
 };
@@ -437,15 +438,12 @@ item.prototype.display=function(){
 };
 blank.prototype.display=function(){};
 attackObj.prototype.display=function(){
+  //console.log(this.dx+"/"+this.dy);
   if(player1.weopan==="lazer"){
     ctx.fillStyle= 'rgb(190,10,10)';
     ctx.fillRect(this.x, this.y, 5, 5);
-    if(this.direction==="left"){
-      this.x-=7;
-    }
-    if(this.direction==="right"){
-      this.x+=7;
-    }
+    this.x+=this.speed*this.dx;
+    this.y-=this.speed*this.dy;
     this.acceleration+=0.02;
     this.y+=this.acceleration;
     if(this.x<0||this.x>canvas.width||this.y>canvas.height||this.y<0){
@@ -495,7 +493,8 @@ player.prototype.display = function() {
     if(input.attack){
       this.attacking=true;
       if(this.ammo>0&&timer%5===0&&this.weopan==="lazer"){
-        blocks.push(new attackObj(this.x+10,this.y+5,this.direction,blocks.length+1));
+        //console.log(Math.sign(mouseX-canvas.width/2-20)*Math.sin(Math.atan((canvas.height/2-mouseY+20)/(mouseX-canvas.width/2-20))));
+        blocks.push(new attackObj(this.x+10,this.y+5,Math.sign(mouseX-canvas.width/2-20)*Math.cos(Math.atan((canvas.height/2-mouseY+20)/(mouseX-canvas.width/2-20))),Math.sign(mouseX-canvas.width/2-20)*Math.sin(Math.atan((canvas.height/2-mouseY+20)/(mouseX-canvas.width/2-20))),6,blocks.length+1));
         this.ammo--;
       }
       this.attacking=false;
@@ -1451,6 +1450,8 @@ var reload=function(a){
         blocks.push(new wall(x*20,y*20,3));
         extraBlocks.push(new spike(x*20,y*20,0));
         isHazard[y][x]=true;
+      }else{
+        isBlock[y][x]=false;
       }
     }
   }
@@ -1488,6 +1489,7 @@ var reload=function(a){
 reload();
 var levelNum2=height;
 var loaded=[true];
+//console.log("a");
 draw = function() { 
   //ctx.translate(player1.x,player1.y);
   var canvas = document.getElementById('canvas');
@@ -1540,6 +1542,7 @@ draw = function() {
   ctx.font = '10px sans-serif';//11b+11b+11b+3b=19.61
   ctx.fillText(input.restart,2,10);//3b+3b+3b+11b=19.99
   ctx.fillText(player1.hp,2,20);//small fall+small fall+small fall+run=
+  ctx.fillText(player1.ammo,2,80);
   ctx.fillText(npc1.opinion,2,30);
   ctx.fillText(kc,2,40);
   ctx.fillText(mouseX,2,50);
