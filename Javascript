@@ -52,8 +52,12 @@ var levels =[[" 3434343.,.343434343.,.3434343",
   "34343434343434,.,.,.,.,.,.,43",
   "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
   "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+  "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+  "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+  "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
+  "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
   "34,.,.,.,.,.,.,.,43.,.,.,.,.,",
-  "34,.,.,.,.,.,.,.,.,.,.,.,.,.,   3",
+  "34,.,.,.,.,.,.,.,.,.,.,.,.,.   s3",
   "34,.,.,.,.,.,.,.,.,.,.,.,.,434343",
   "34,.,.,.,.,.,.,.,.,.,.,.3.,43434",
   "34,.,.,.,.,.,.,.,.,.,.,.,.,43",
@@ -426,12 +430,12 @@ item.prototype.display=function(){
       if(player1.items[i]===""/*||player1.items[i]===Null*/){
         player1.items[i]=this.t;
         i=player1.capacity+1;
+        items[height].t[this.id]="";
+        items[height].x[this.id]=0;
+        items[height].y[this.id]=0;
+        blocks[this.index-1]=new blank(-20,-20,0);
       }
     }
-    items[height].t[this.id]="";
-    items[height].x[this.id]=0;
-    items[height].y[this.id]=0;
-    blocks[this.index-1]=new blank(-20,-20,0);
   }
   //bannerText(this.t,this.x,this.y);
   displayItem(this.x,this.y,this.t,this.s);
@@ -1490,6 +1494,7 @@ reload();
 var levelNum2=height;
 var loaded=[true];
 //console.log("a");
+var f=Math.floor(canvas.width/600);
 draw = function() { 
   //ctx.translate(player1.x,player1.y);
   var canvas = document.getElementById('canvas');
