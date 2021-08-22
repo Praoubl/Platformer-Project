@@ -1,2 +1,2 @@
 # Platformer-Project
-Platformer for G/A Club
+Combat/exploration focused platforming game in HTML/CSS/Javascript
